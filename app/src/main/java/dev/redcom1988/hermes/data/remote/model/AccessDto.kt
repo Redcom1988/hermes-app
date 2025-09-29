@@ -1,14 +1,15 @@
 package dev.redcom1988.hermes.data.remote.model
 
-import dev.redcom1988.hermes.domain.access.Access
+import dev.redcom1988.hermes.domain.account_data.model.Access
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AccessDto (
+data class AccessDto(
     val id: Int,
     val name: String,
     val description: String,
+    @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")
     val updatedAt: String,

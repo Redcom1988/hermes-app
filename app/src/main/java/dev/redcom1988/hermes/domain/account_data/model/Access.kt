@@ -1,4 +1,4 @@
-package dev.redcom1988.hermes.domain.access
+package dev.redcom1988.hermes.domain.account_data.model
 
 class Access(
     val id: Int,

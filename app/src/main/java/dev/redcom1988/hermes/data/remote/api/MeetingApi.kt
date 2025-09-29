@@ -1,10 +1,9 @@
 package dev.redcom1988.hermes.data.remote.api
 
-import dev.redcom1988.hermes.data.remote.model.MeetingDto
+import dev.redcom1988.hermes.data.remote.model.requests.MeetingApiRequestDto
 import okhttp3.Response
 
 interface MeetingApi {
-    suspend fun getMeetings(): Response
-    suspend fun createMeeting(meeting: MeetingDto): Response
-    suspend fun updateMeeting(id: Int, meeting: MeetingDto): Response
+    suspend fun getMeetingData(): Response
+    suspend fun pushMeetingChanges(request: MeetingApiRequestDto): Response
 }
