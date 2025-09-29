@@ -98,6 +98,7 @@ internal fun PreferenceItem(
                     },
                 )
             }
+
             is Preference.PreferenceItem.BasicSwitchPreference -> {
                 SwitchPreferenceWidget(
                     enabled = item.enabled,
@@ -110,6 +111,7 @@ internal fun PreferenceItem(
                     }
                 )
             }
+
             is Preference.PreferenceItem.ListPreference<*> -> {
                 val value by item.preference.collectAsState()
                 ListPreferenceWidget(
@@ -128,6 +130,7 @@ internal fun PreferenceItem(
                     },
                 )
             }
+
             is Preference.PreferenceItem.BasicListPreference -> {
                 ListPreferenceWidget(
                     value = item.value,
@@ -139,6 +142,7 @@ internal fun PreferenceItem(
                     onValueChange = { scope.launch { item.onValueChanged(it) } },
                 )
             }
+
             is Preference.PreferenceItem.ListSearchPreference -> {
                 val value by item.preference.collectAsState()
                 ListSearchPreferenceWidget(
@@ -157,6 +161,7 @@ internal fun PreferenceItem(
                     }
                 )
             }
+
             is Preference.PreferenceItem.MultiSelectListPreference -> {
                 val values by item.preference.collectAsState()
                 MultiSelectListPreferenceWidget(
@@ -172,6 +177,7 @@ internal fun PreferenceItem(
                     },
                 )
             }
+
             is Preference.PreferenceItem.BasicMultiSelectListPreference -> {
                 BasicMultiSelectListPreferenceWidget(
                     preference = item,
@@ -183,6 +189,7 @@ internal fun PreferenceItem(
                     }
                 )
             }
+
             is Preference.PreferenceItem.AlertDialogPreference -> {
                 AlertDialogPreferenceWidget(
                     enabled = item.enabled,
@@ -196,6 +203,7 @@ internal fun PreferenceItem(
                     onCancel = item.onCancel
                 )
             }
+
             is Preference.PreferenceItem.TextPreference -> {
                 TextPreferenceWidget(
                     title = item.title,
@@ -206,6 +214,7 @@ internal fun PreferenceItem(
                     onPreferenceClick = item.onClick,
                 )
             }
+
             is Preference.PreferenceItem.EditTextPreference -> {
                 val values by item.preference.collectAsState()
                 EditTextPreferenceWidget(
@@ -221,9 +230,11 @@ internal fun PreferenceItem(
                     },
                 )
             }
+
             is Preference.PreferenceItem.InfoPreference -> {
                 InfoWidget(text = item.title)
             }
+
             is Preference.PreferenceItem.MultiplePermissionPreference -> {
                 PermissionPreferenceWidget(
                     enabled = item.enabled,
@@ -235,6 +246,7 @@ internal fun PreferenceItem(
                     }
                 )
             }
+
             is Preference.PreferenceItem.PermissionPreference -> {
                 PermissionPreferenceWidget(
                     enabled = item.enabled,
@@ -246,6 +258,7 @@ internal fun PreferenceItem(
                     }
                 )
             }
+
             is Preference.PreferenceItem.CustomPreference -> {
                 item.content()
             }

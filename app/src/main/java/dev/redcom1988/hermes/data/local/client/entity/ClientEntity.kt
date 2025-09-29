@@ -3,7 +3,6 @@ package dev.redcom1988.hermes.data.local.client.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import dev.redcom1988.hermes.core.util.extension.formatToString
-import dev.redcom1988.hermes.domain.common.SyncStatus
 import java.time.LocalDateTime
 
 const val clientEntityTableName = "clients"
@@ -15,8 +14,8 @@ data class ClientEntity(
     val phoneNumber: String,
     val email: String,
     val address: String,
+    val isSynced: Boolean = true,
     val isDeleted: Boolean = false,
     val updatedAt: String = LocalDateTime.now().formatToString(),
-    val createdAt: String = LocalDateTime.now().formatToString(),
-    val syncStatus: SyncStatus = SyncStatus.CREATED
+    val createdAt: String = LocalDateTime.now().formatToString()
 )

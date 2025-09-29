@@ -16,7 +16,7 @@ fun ServiceEntity.toDomain() = Service(
     createdAt = createdAt
 )
 
-fun Service.toEntity() = ServiceEntity(
+fun Service.toEntity(isSynced: Boolean = true) = ServiceEntity(
     serviceId = id,
     clientId = clientId,
     serviceTypeId = serviceTypeId,
@@ -24,7 +24,8 @@ fun Service.toEntity() = ServiceEntity(
     servicePrice = servicePrice,
     startTime = startTime,
     expireTime = expireTime,
+    isSynced = isSynced,
     isDeleted = isDeleted,
     updatedAt = updatedAt,
-    createdAt = createdAt,
+    createdAt = createdAt
 )

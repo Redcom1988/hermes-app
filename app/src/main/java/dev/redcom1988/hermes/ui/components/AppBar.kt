@@ -152,9 +152,10 @@ fun AppBar(
             title = titleContent,
             actions = actions,
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = backgroundColor ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = if (isActionMode) 8.dp else 0.dp,
-                ),
+                containerColor = backgroundColor
+                    ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        elevation = if (isActionMode) 8.dp else 0.dp,
+                    ),
             ),
             scrollBehavior = scrollBehavior,
         )
@@ -260,6 +261,7 @@ fun AppBarActions(
                                 )
                             }
                         }
+
                         else -> null
                     },
                     onClick = {

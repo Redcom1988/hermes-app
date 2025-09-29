@@ -107,12 +107,14 @@ fun ColorPicker(
                 showAlphaBar = type.showAlphaBar,
                 onPickedColor = onPickedColor,
             )
+
             is ColorPickerType.Circle -> CircleColorPicker(
                 showAlphaBar = type.showAlphaBar,
                 showBrightnessBar = type.showBrightnessBar,
                 lightCenter = type.lightCenter,
                 onPickedColor = onPickedColor
             )
+
             is ColorPickerType.Ring -> RingColorPicker(
                 ringWidth = type.ringWidth,
                 previewRadius = type.previewRadius,
@@ -122,6 +124,7 @@ fun ColorPicker(
                 showColorPreview = type.showColorPreview,
                 onPickedColor = onPickedColor
             )
+
             is ColorPickerType.SimpleRing -> SimpleRingColorPicker(
                 colorWidth = type.colorWidth,
                 tracksCount = type.tracksCount,

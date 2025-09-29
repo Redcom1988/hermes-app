@@ -123,7 +123,9 @@ private fun Modifier.drawScrollbar(
         0f
     } else {
         items
-            .fastFirstOrNull { (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true }
+            .fastFirstOrNull {
+                (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true
+            }
             ?.run {
                 val startPadding = if (reverseDirection) {
                     layoutInfo.afterContentPadding

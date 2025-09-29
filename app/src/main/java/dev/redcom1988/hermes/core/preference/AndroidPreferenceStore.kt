@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class AndroidPreferenceStore(
     context: Context,
-    private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context),
+    private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+        context
+    ),
 ) : PreferenceStore {
 
     private val keyFlow = sharedPreferences.keyFlow

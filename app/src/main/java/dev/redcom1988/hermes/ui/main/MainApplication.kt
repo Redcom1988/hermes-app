@@ -7,20 +7,19 @@ import dev.redcom1988.hermes.core.notification.NotificationHelper
 import dev.redcom1988.hermes.core.util.extension.injectLazy
 import dev.redcom1988.hermes.data.di.dataModule
 import dev.redcom1988.hermes.ui.di.uiModule
-import dev.redcom1988.hermes.ui.screen.subscription.notifier.SubscriptionNotifier
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.Logger
 import org.koin.core.logger.MESSAGE
 
-class MainApplication: Application() {
+class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
         startKoin {
             logger(
-                object: Logger() {
+                object : Logger() {
                     override fun display(level: Level, msg: MESSAGE) {
                         when (level) {
                             Level.DEBUG -> Log.d(null, msg)
@@ -45,7 +44,6 @@ class MainApplication: Application() {
         val notificationHelper by injectLazy<NotificationHelper>()
         notificationHelper.createNotificationChannels(
             listOf(
-                SubscriptionNotifier.createNotificationChannel()
             )
         )
     }

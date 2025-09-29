@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import cafe.adriel.voyager.core.screen.Screen
 
-abstract class ResultScreen: Screen {
+abstract class ResultScreen : Screen {
     var arguments: HashMap<String, Any?> = HashMap()
 
     @Composable

@@ -164,7 +164,7 @@ sealed class Preference {
             override val visible: Boolean = true,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: List<String>) -> Boolean = { true },
-        ): PreferenceItem<List<String>>()
+        ) : PreferenceItem<List<String>>()
 
         data class AlertDialogPreference(
             override val title: String,
@@ -212,7 +212,7 @@ sealed class Preference {
             override val subtitle: String? = null,
             override val visible: Boolean = true,
             override val enabled: Boolean = true,
-        ): PreferenceItem<Unit>() {
+        ) : PreferenceItem<Unit>() {
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: Unit) -> Boolean = { true }
         }
@@ -223,7 +223,7 @@ sealed class Preference {
             override val subtitle: String? = null,
             override val visible: Boolean = true,
             override val enabled: Boolean = true,
-        ): PreferenceItem<Unit>() {
+        ) : PreferenceItem<Unit>() {
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (value: Unit) -> Boolean = { true }
         }

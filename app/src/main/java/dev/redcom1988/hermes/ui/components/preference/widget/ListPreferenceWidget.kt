@@ -66,8 +66,16 @@ fun <T> ListPreferenceWidget(
                             }
                         }
                     }
-                    if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                    if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
+                    if (state.canScrollBackward) HorizontalDivider(
+                        modifier = Modifier.align(
+                            Alignment.TopCenter
+                        )
+                    )
+                    if (state.canScrollForward) HorizontalDivider(
+                        modifier = Modifier.align(
+                            Alignment.BottomCenter
+                        )
+                    )
                 }
             },
             confirmButton = {

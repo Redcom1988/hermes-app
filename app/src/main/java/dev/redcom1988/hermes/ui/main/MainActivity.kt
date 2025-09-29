@@ -1,7 +1,5 @@
 package dev.redcom1988.hermes.ui.main
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver
@@ -9,29 +7,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.core.util.Consumer
+import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import cafe.adriel.voyager.transitions.ScreenTransition
-import dev.redcom1988.hermes.ui.screen.subscription.SubscriptionScreen
-import dev.redcom1988.hermes.ui.screen.subscription.notifier.SubscriptionNotifier.SUBSCRIPTION_ID
-import dev.redcom1988.hermes.ui.screen.subscription.notifier.SubscriptionNotifier.SUBSCRIPTION_NOTIFICATION_BUNDLE
-import dev.redcom1988.hermes.ui.theme.SubslyTheme
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collectLatest
+import dev.redcom1988.hermes.domain.auth.AuthRepository
+import dev.redcom1988.hermes.core.util.extension.injectLazy
+import dev.redcom1988.hermes.ui.screen.home.HomeScreen
+import dev.redcom1988.hermes.ui.screen.login.LoginScreen
+import dev.redcom1988.hermes.ui.theme.HermesTheme
 import soup.compose.material.motion.animation.materialSharedAxisX
 import soup.compose.material.motion.animation.rememberSlideDistance
 
+
 class MainActivity : ComponentActivity() {
 
+    private val authRepository: AuthRepository by injectLazy()
     private var isReady = false
-    private var initialScreen: Screen = SubscriptionScreen()
+//    private var initialScreen: Screen = HomeScreen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,61 +55,46 @@ class MainActivity : ComponentActivity() {
             }
         )
 
-        handlePreDraw()
         enableEdgeToEdge()
         setContent {
-            SubslyTheme {
-                val slideDistance = rememberSlideDistance()
-                Navigator(
-                    screen = initialScreen,
-                    disposeBehavior = NavigatorDisposeBehavior(
-                        disposeNestedNavigators = false,
-                        disposeSteps = true,
-                    )
-                ) { navigator ->
-                    ScreenTransition(
-                        modifier = Modifier.fillMaxSize(),
-                        navigator = navigator,
-                        transition = {
-                            materialSharedAxisX(
-                                forward = navigator.lastEvent != StackEvent.Pop,
-                                slideDistance = slideDistance,
-                            )
-                        },
-                    )
-                    HandleNewIntent(this@MainActivity, navigator)
+            HermesTheme {
+                val globalAuthScreenModel = remember { GlobalAuthScreenModel(authRepository) }
+                val authState by globalAuthScreenModel.authState.collectAsState()
+                LaunchedEffect(Unit) {
+                    globalAuthScreenModel.initialize()
+                }
+
+                if (authState.isInitialized) {
+                    val initialScreen: Screen = if (authState.isLoggedIn) {
+                        HomeScreen
+                    } else {
+                        LoginScreen
+                    }
+
+                    val slideDistance = rememberSlideDistance()
+                    Navigator(
+                        screen = initialScreen,
+                        disposeBehavior = NavigatorDisposeBehavior(
+                            disposeNestedNavigators = false,
+                            disposeSteps = true,
+                        )
+                    ) { navigator ->
+                        ScreenTransition(
+                            modifier = Modifier.fillMaxSize(),
+                            navigator = navigator,
+                            transition = {
+                                materialSharedAxisX(
+                                    forward = navigator.lastEvent != StackEvent.Pop,
+                                    slideDistance = slideDistance,
+                                )
+                            },
+                        )
+                    }
+                }
+                LaunchedEffect(authState.isInitialized) {
+                    isReady = true
                 }
             }
         }
-    }
-
-    @Composable
-    private fun HandleNewIntent(context: Context, navigator: Navigator) {
-        LaunchedEffect(Unit) {
-            callbackFlow {
-                val componentActivity = context as ComponentActivity
-                val consumer = Consumer<Intent> { trySend(it) }
-                componentActivity.addOnNewIntentListener(consumer)
-                awaitClose { componentActivity.removeOnNewIntentListener(consumer) }
-            }.collectLatest { handleIntentAction(it, navigator) }
-        }
-    }
-
-    private fun handleIntentAction(intent: Intent, navigator: Navigator) {
-        val subscriptionNotificationBundle = intent.getBundleExtra(SUBSCRIPTION_NOTIFICATION_BUNDLE)
-        subscriptionNotificationBundle?.let {
-            val subscriptionId = subscriptionNotificationBundle.getInt(SUBSCRIPTION_ID, -1)
-            navigator.popUntilRoot()
-            navigator.push(
-                SubscriptionScreen(
-                    if (subscriptionId == -1) null else subscriptionId
-                )
-            )
-        }
-
-    }
-
-    private fun handlePreDraw() {
-        isReady = true
     }
 }

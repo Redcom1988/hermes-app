@@ -113,7 +113,8 @@ private fun Modifier.drawScrollbar(
     }
 
     // Calculate content size without padding for scrollbar calculations
-    val contentViewportSize = viewportSize - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
+    val contentViewportSize =
+        viewportSize - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
 
     val items = layoutInfo.visibleItemsInfo
     val itemsSize = items.fastSumBy {
@@ -124,13 +125,16 @@ private fun Modifier.drawScrollbar(
     val totalSize = estimatedItemSize * layoutInfo.totalItemsCount
 
     // Calculate thumb size based on content viewport, but draw it on the full viewport
-    val thumbSize = (contentViewportSize / totalSize * contentViewportSize).coerceAtMost(contentViewportSize.toFloat())
+    val thumbSize =
+        (contentViewportSize / totalSize * contentViewportSize).coerceAtMost(contentViewportSize.toFloat())
 
     val startOffset = if (items.isEmpty()) {
         0f
     } else {
         items
-            .fastFirstOrNull { (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true }
+            .fastFirstOrNull {
+                (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true
+            }
             ?.run {
                 val itemOffset = if (orientation == Orientation.Horizontal) {
                     offset.x

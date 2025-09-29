@@ -32,6 +32,7 @@ sealed class UiImage {
                     error = error
                 )
             }
+
             is DrawableResource -> painterResource(imageDrawable)
         }
     }

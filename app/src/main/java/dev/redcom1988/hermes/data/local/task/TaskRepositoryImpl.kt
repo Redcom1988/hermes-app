@@ -1,71 +1,40 @@
 package dev.redcom1988.hermes.data.local.task
 
-import dev.redcom1988.hermes.core.util.extension.formatToString
-import dev.redcom1988.hermes.core.util.extension.parseAs
+import androidx.room.Transaction
+import dev.redcom1988.hermes.core.util.extension.formattedNow
+import dev.redcom1988.hermes.data.local.account_data.mapper.toDomain
+import dev.redcom1988.hermes.data.local.account_data.mapper.toEntity
 import dev.redcom1988.hermes.data.local.task.entity.TaskEntity
-import dev.redcom1988.hermes.data.local.task.entity.TaskWithSubTasks
-import dev.redcom1988.hermes.data.local.task.entity.visibleSubTasks
-import dev.redcom1988.hermes.data.local.user.toDomain
 import dev.redcom1988.hermes.data.remote.api.TaskApi
-import dev.redcom1988.hermes.data.remote.model.TaskDto
-import dev.redcom1988.hermes.data.remote.model.toDomain
-import dev.redcom1988.hermes.domain.common.SyncStatus
+import dev.redcom1988.hermes.data.remote.model.requests.TaskApiRequestDto
+import dev.redcom1988.hermes.data.remote.model.responses.TaskApiResponseDto
+import dev.redcom1988.hermes.data.remote.model.responses.toDomainEmployeeTasks
+import dev.redcom1988.hermes.data.remote.model.responses.toDomainTasks
+import dev.redcom1988.hermes.domain.account_data.model.Employee
+import dev.redcom1988.hermes.domain.account_data.model.EmployeeTaskCrossRef
+import dev.redcom1988.hermes.domain.account_data.mapper.toDto
 import dev.redcom1988.hermes.domain.task.Task
 import dev.redcom1988.hermes.domain.task.TaskRepository
+import dev.redcom1988.hermes.domain.task.TaskStatus
 import dev.redcom1988.hermes.domain.task.toDto
-import dev.redcom1988.hermes.domain.user.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.LocalDateTime
+import kotlinx.serialization.json.Json
 
 class TaskRepositoryImpl(
     private val taskDao: TaskDao,
-    private val api: TaskApi
+    private val employeeTaskDao: EmployeeTaskDao,
 ) : TaskRepository {
 
-    override fun getTasksFlow(): Flow<List<Task>> {
-        return taskDao.getVisibleTasksFlow()
-            .map { list -> list.map { it.toDomain() } }
-    }
+    // """ LOCAL OPERATIONS """
 
-    override fun getTasksByUserIdFlow(userId: Int): Flow<List<Task>> {
-        return taskDao.getUserWithTasksFlow(userId)
-            .map { it.tasks.map { task -> task.toDomain() } }
-    }
-
-    override fun getUsersByTaskIdFlow(taskId: Int): Flow<List<User>> {
-        return taskDao.getTaskWithUsersFlow(taskId)
-            .map { it.users.map { user -> user.toDomain() } }
-    }
-
-    override fun getTasksWithSubTasksFlow(): Flow<List<TaskWithSubTasks>> {
-        return taskDao.getTasksWithSubTasksFlow()
-            .map { list -> list.map { taskWithSubTasks ->
-                taskWithSubTasks.copy(subTasks = taskWithSubTasks.visibleSubTasks) } }
-    }
-
-    suspend fun syncTasksFromServer(serverTasks: List<Task>) {
-        val localTasks = taskDao.getAllTasks()
-            .associateBy { it.taskId }
-
-        val mergedTasks = serverTasks.map { server ->
-            val serverEntity = server.toEntity()
-            val local = localTasks[server.id]
-
-            when {
-                local == null -> serverEntity
-                local.syncStatus != SyncStatus.UNCHANGED && local.updatedAt > server.updatedAt -> local
-                else -> serverEntity.copy(syncStatus = SyncStatus.UNCHANGED)
-            }
-        }
-        taskDao.insertTasks(mergedTasks)
-    }
-
+    // Generate a temporary task ID for new tasks
     suspend fun generateTempTaskId(): Int {
         val minTempId = taskDao.getMinTempTaskId() ?: 0
         return minTempId - 1
     }
 
+    // Add a new task
     override suspend fun addTask(
         name: String,
         description: String?,
@@ -77,81 +46,149 @@ class TaskRepositoryImpl(
             taskId = tempId,
             taskName = name,
             taskDescription = description,
+            status = TaskStatus.PENDING,
             deadline = deadline,
-            parentTaskId = parentTaskId
+            parentTaskId = parentTaskId,
+            isSynced = false,
+            isDeleted = false,
+            updatedAt = formattedNow(),
+            createdAt = formattedNow()
         )
-        taskDao.insertTask(entity)
+        taskDao.upsertTask(entity)
         return tempId
     }
 
-    override suspend fun updateTask(task: Task) {
-        val entity = task.toEntity().copy(
-            syncStatus = SyncStatus.UPDATED,
-            updatedAt = LocalDateTime.now().formatToString()
-        )
-        taskDao.updateTask(entity)
+    // Unused insert function, commented out for now
+//    override suspend fun insert(task: Task) {
+//        taskDao.insertTask(task.toEntity())
+//    }
+
+    // Update task locally
+    override suspend fun update(task: Task) {
+        val updated = task.copy(updatedAt = formattedNow())
+        taskDao.updateTask(updated.toEntity(isSynced = false))
     }
 
-    override suspend fun deleteTaskById(taskId: Int) {
-        taskDao.softDeleteTaskById(taskId, SyncStatus.DELETED)
-        taskDao.softDeleteSubTasksOf(taskId, SyncStatus.DELETED)
+    override fun getVisibleLinks(): Flow<List<EmployeeTaskCrossRef>> {
+        return employeeTaskDao.getVisibleLinks()
+            .map { list -> list.map { it.toDomain() } }
     }
 
-    override suspend fun getPendingSyncTasks(): List<TaskEntity> {
-        return taskDao.getPendingSyncTasks()
-    }
-
-    suspend fun pushPendingTasksToServer() {
-        val pendingTasks = getPendingSyncTasks()
-
-        for (task in pendingTasks) {
-            val dto = task.toDomain().toDto()
-
-            when (task.syncStatus) {
-                SyncStatus.CREATED -> {
-                    val result = api.createTask(dto)
-                    if (result.isSuccessful) {
-                        val serverTask = result.parseAs<TaskDto>().toDomain()
-                        taskDao.insertTask(serverTask.toEntity()
-                            .copy(syncStatus = SyncStatus.UNCHANGED))
-                    }
-                }
-
-                SyncStatus.UPDATED -> {
-                    val result = api.updateTask(task.taskId, task.toDomain().toDto())
-                    if (result.isSuccessful) {
-                        taskDao.updateTask(task
-                            .copy(syncStatus = SyncStatus.UNCHANGED))
-                    }
-                }
-
-                SyncStatus.DELETED -> {
-                    val deletedDto = dto.copy(isDeleted = true)
-                    val result = api.updateTask(task.taskId, deletedDto)
-                    if (result.isSuccessful) {
-                        taskDao.updateTask((task
-                            .copy(syncStatus = SyncStatus.UNCHANGED)))
-                    }
-                }
-
-                else -> Unit
-            }
+    // Clear parent ID from subtasks of a given task
+    @Transaction
+    suspend fun clearParentIdFromSubtask(taskId: Int) {
+        val subTasks = taskDao.getTasksByParentId(taskId)
+        subTasks.forEach { subTask ->
+            val updatedSubTask = subTask.copy(parentTaskId = null, isSynced = false, updatedAt = formattedNow())
+            taskDao.updateTask(updatedSubTask)
         }
     }
 
-    override suspend fun syncTasks() {
-        pushPendingTasksToServer()
-
-        val response = api.getTasks()
-        if (response.isSuccessful) {
-            val tasksFromServer = response
-                .parseAs<List<TaskDto>>()
-                .map { dto: TaskDto -> dto.toDomain() }
-            syncTasksFromServer(serverTasks = tasksFromServer)
-        }
+    // Soft delete a task and its subtasks, along with employee-task links
+    @Transaction
+    override suspend fun softDeleteTaskWithLinks(taskId: Int) {
+        taskDao.softDeleteTaskById(taskId, formattedNow())
+        // Only soft delete to match web behavior
+        taskDao.softDeleteSubTasksByParentId(taskId, formattedNow())
+//        if (softDeleteConnected) {
+//            taskDao.softDeleteSubTasksByParentId(taskId, formattedNow())
+//        } else {
+//            clearParentIdFromSubtask(taskId)
+//        }
+        employeeTaskDao.softDeleteAllLinksForTask(taskId, formattedNow())
     }
 
-    override suspend fun clearLocalTasks() {
+    override fun getVisibleTasks(): Flow<List<Task>> {
+        return taskDao.getVisibleTasksFlow()
+            .map { list -> list.map { it.toDomain() } }
+    }
+
+    override fun getSubtaskForTask(taskId: Int): Flow<List<Task>> {
+        return taskDao.getSubTasksByParentId(taskId).map { list -> list.map { it.toDomain() } }
+    }
+
+    override fun getEmployeesForTask(taskId: Int): Flow<List<Employee>> {
+        return employeeTaskDao.getActiveEmployeesForTask(taskId)
+            .map { list -> list.map { it.toDomain() } }
+    }
+
+    override suspend fun upsertEmployeeTaskLink(employeeId: Int, taskId: Int) {
+        employeeTaskDao.upsertLink(employeeId, taskId)
+    }
+
+    override suspend fun softDeleteEmployeeTaskLink(employeeId: Int, taskId: Int) {
+        employeeTaskDao.softDeleteLink(employeeId, taskId, formattedNow())
+    }
+
+    override suspend fun insertTasks(tasks: List<Task>) {
+        taskDao.insertTasks(tasks.map { it.toEntity() })
+    }
+
+    override suspend fun insertEmployeeTasks(crossRefs: List<EmployeeTaskCrossRef>) {
+        employeeTaskDao.insertLinks(crossRefs.map { it.toEntity() })
+    }
+
+    override suspend fun getPendingSyncTasks(): List<Task> {
+        return taskDao.getPendingSyncTasks().map { it.toDomain() }
+    }
+
+    override suspend fun getPendingSyncEmployeeTasks(): List<EmployeeTaskCrossRef> {
+        return employeeTaskDao.getPendingSyncLinks().map { it.toDomain() }
+    }
+
+    override suspend fun deleteAllTasks() {
         taskDao.deleteAllTasks()
     }
+
+    override suspend fun deleteAllEmployeeTasks() {
+        employeeTaskDao.deleteAllLinks()
+    }
+
+
+    override fun getTasksForEmployee(employeeId: Int): Flow<List<Task>> {
+        return employeeTaskDao.getActiveTasksForEmployee(employeeId)
+            .map { list -> list.map { it.toDomain() } }
+    }
+
+    // """ API OPERATIONS """
+
+//    private suspend fun fetchDataFromRemote(): TaskApiResponseDto {
+//        val response = api.getTaskData()
+//        if (!response.isSuccessful) {
+//            throw Exception("Failed to fetch tasks from remote: ${response.code}")
+//        }
+//
+//        val bodyString = response.body.string()
+//        return Json.decodeFromString<TaskApiResponseDto>(bodyString)
+//    }
+
+//    @Transaction
+//    private suspend fun upsertDataFromRemote(response: TaskApiResponseDto) {
+//        val remoteTasks = response.toDomainTasks()
+//        val remoteEmployeeTasks = response.toDomainEmployeeTasks()
+//
+//        remoteTasks.forEach { task ->
+//            val entity = task.toEntity()
+//            taskDao.upsertRemoteTaskIfClean(entity)
+//        }
+//
+//        remoteEmployeeTasks.forEach { crossRef ->
+//            val entity = crossRef.toEntity()
+//            employeeTaskDao.upsertRemoteLinkIfClean(entity)
+//        }
+//    }
+//
+//    private suspend fun pushChangesToRemote() {
+//        val requestDto = TaskApiRequestDto(
+//            tasks = getPendingSyncTasks().map { it.toDto() },
+//            employeeTasks = getPendingSyncEmployeeTasks().map { it.toDto() }
+//        )
+//        api.pushTaskChanges(requestDto)
+//    }
+//
+//    override suspend fun syncEmployeeTasks() {
+//        pushChangesToRemote()
+//        val response = fetchDataFromRemote()
+//        upsertDataFromRemote(response)
+//    }
 }

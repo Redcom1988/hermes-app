@@ -61,7 +61,13 @@ internal fun ColorSlideBar(colors: List<Color>, onProgress: (Float) -> Unit) {
             .border(0.2.dp, Color.LightGray, RoundedCornerShape(100))
     ) {
         drawTransparentBackground(3)
-        drawRect(Brush.horizontalGradient(colors, startX = size.height/2, endX = size.width - size.height/2))
+        drawRect(
+            Brush.horizontalGradient(
+                colors,
+                startX = size.height / 2,
+                endX = size.width - size.height / 2
+            )
+        )
         drawCircle(
             Color.White,
             radius = thumbRadius,

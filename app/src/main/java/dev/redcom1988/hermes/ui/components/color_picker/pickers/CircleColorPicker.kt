@@ -82,94 +82,100 @@ internal fun CircleColorPicker(
         )
     }
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-        Canvas(modifier = modifier
-            .size(200.dp)
-            .onSizeChanged {
-                radius = it.width / 2f
-            }
-            .pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                        val angle =
-                            (Math.toDegrees(
-                                atan2(
-                                    it.y - radius,
-                                    it.x - radius
-                                ).toDouble()
-                            ) + 360) % 360
-                        val length = getLength(it.x, it.y, radius)
-                        val radiusProgress = 1 - (length / radius).coerceIn(0f, 1f)
-                        val angleProgress = angle / 360f
-                        val (rangeProgress, range) = ColorPickerHelper.calculateRangeProgress(
-                            angleProgress
-                        )
-                        pickerColor = when (range) {
-                            ColorRange.RedToYellow -> {
-                                Color(
-                                    red = 255.moveColorTo(lightCenter, radiusProgress),
-                                    green = (255f * rangeProgress)
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                    blue = 0.moveColorTo(lightCenter, radiusProgress),
-                                )
-                            }
-                            ColorRange.YellowToGreen -> {
-                                Color(
-                                    red = (255 * (1 - rangeProgress))
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                    green = 255.moveColorTo(lightCenter, radiusProgress),
-                                    blue = 0.moveColorTo(lightCenter, radiusProgress),
-                                )
-                            }
-                            ColorRange.GreenToCyan -> {
-                                Color(
-                                    red = 0.moveColorTo(lightCenter, radiusProgress),
-                                    green = 255.moveColorTo(lightCenter, radiusProgress),
-                                    blue = (255 * rangeProgress)
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                )
-                            }
-                            ColorRange.CyanToBlue -> {
-                                Color(
-                                    red = 0.moveColorTo(lightCenter, radiusProgress),
-                                    green = (255 * (1 - rangeProgress))
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                    blue = 255.moveColorTo(lightCenter, radiusProgress),
-                                )
-                            }
-                            ColorRange.BlueToPurple -> {
-                                Color(
-                                    red = (255 * rangeProgress)
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                    green = 0.moveColorTo(lightCenter, radiusProgress),
-                                    blue = 255.moveColorTo(lightCenter, radiusProgress),
-                                )
-                            }
-                            ColorRange.PurpleToRed -> {
-                                Color(
-                                    red = 255.moveColorTo(lightCenter, radiusProgress),
-                                    green = 0.moveColorTo(lightCenter, radiusProgress),
-                                    blue = (255 * (1 - rangeProgress))
-                                        .moveColorTo(lightCenter, radiusProgress)
-                                        .roundToInt(),
-                                )
-                            }
-                        }
-                        pickerLocation = getBoundedPointWithInRadius(
-                            it.x,
-                            it.y,
-                            length,
-                            radius,
-                            BoundedPointStrategy.Inside
-                        )
-                    }
+        Canvas(
+            modifier = modifier
+                .size(200.dp)
+                .onSizeChanged {
+                    radius = it.width / 2f
                 }
-                return@pointerInteropFilter true
-            }) {
+                .pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                            val angle =
+                                (Math.toDegrees(
+                                    atan2(
+                                        it.y - radius,
+                                        it.x - radius
+                                    ).toDouble()
+                                ) + 360) % 360
+                            val length = getLength(it.x, it.y, radius)
+                            val radiusProgress = 1 - (length / radius).coerceIn(0f, 1f)
+                            val angleProgress = angle / 360f
+                            val (rangeProgress, range) = ColorPickerHelper.calculateRangeProgress(
+                                angleProgress
+                            )
+                            pickerColor = when (range) {
+                                ColorRange.RedToYellow -> {
+                                    Color(
+                                        red = 255.moveColorTo(lightCenter, radiusProgress),
+                                        green = (255f * rangeProgress)
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                        blue = 0.moveColorTo(lightCenter, radiusProgress),
+                                    )
+                                }
+
+                                ColorRange.YellowToGreen -> {
+                                    Color(
+                                        red = (255 * (1 - rangeProgress))
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                        green = 255.moveColorTo(lightCenter, radiusProgress),
+                                        blue = 0.moveColorTo(lightCenter, radiusProgress),
+                                    )
+                                }
+
+                                ColorRange.GreenToCyan -> {
+                                    Color(
+                                        red = 0.moveColorTo(lightCenter, radiusProgress),
+                                        green = 255.moveColorTo(lightCenter, radiusProgress),
+                                        blue = (255 * rangeProgress)
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                    )
+                                }
+
+                                ColorRange.CyanToBlue -> {
+                                    Color(
+                                        red = 0.moveColorTo(lightCenter, radiusProgress),
+                                        green = (255 * (1 - rangeProgress))
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                        blue = 255.moveColorTo(lightCenter, radiusProgress),
+                                    )
+                                }
+
+                                ColorRange.BlueToPurple -> {
+                                    Color(
+                                        red = (255 * rangeProgress)
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                        green = 0.moveColorTo(lightCenter, radiusProgress),
+                                        blue = 255.moveColorTo(lightCenter, radiusProgress),
+                                    )
+                                }
+
+                                ColorRange.PurpleToRed -> {
+                                    Color(
+                                        red = 255.moveColorTo(lightCenter, radiusProgress),
+                                        green = 0.moveColorTo(lightCenter, radiusProgress),
+                                        blue = (255 * (1 - rangeProgress))
+                                            .moveColorTo(lightCenter, radiusProgress)
+                                            .roundToInt(),
+                                    )
+                                }
+                            }
+                            pickerLocation = getBoundedPointWithInRadius(
+                                it.x,
+                                it.y,
+                                length,
+                                radius,
+                                BoundedPointStrategy.Inside
+                            )
+                        }
+                    }
+                    return@pointerInteropFilter true
+                }) {
             drawCircle(
                 Brush.sweepGradient(gradientColors)
             )

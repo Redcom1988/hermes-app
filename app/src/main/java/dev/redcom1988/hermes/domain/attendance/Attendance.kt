@@ -1,11 +1,13 @@
 package dev.redcom1988.hermes.domain.attendance
 
+import dev.redcom1988.hermes.domain.common.WorkLocation
+
 data class Attendance(
     val id: Int,
-    val userId: Int,
+    val employeeId: Int,
     val startTime: String,
     val endTime: String?,
-    val workLocation: AttendanceWorkLocation,
+    val workLocation: WorkLocation,
     val longitude: Double,
     val latitude: Double,
     val imagePath: String? = null,

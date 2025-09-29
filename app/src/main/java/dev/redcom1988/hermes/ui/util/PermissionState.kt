@@ -46,7 +46,10 @@ fun rememberPermissionState(
 
     val permissionGranted = remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
         )
     }
 
@@ -61,8 +64,12 @@ fun rememberPermissionState(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     permissionGranted.value =
-                        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            permission
+                        ) == PackageManager.PERMISSION_GRANTED
                 }
+
                 else -> Unit
             }
         }
@@ -91,7 +98,10 @@ fun rememberMultiplePermissionsState(
     val permissionResults = remember {
         mutableStateMapOf<String, Boolean>().apply {
             permissions.forEach { permission ->
-                val granted = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+                val granted = ContextCompat.checkSelfPermission(
+                    context,
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
                 put(permission, granted)
             }
         }
@@ -110,10 +120,14 @@ fun rememberMultiplePermissionsState(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     permissions.forEach { permission ->
-                        val granted = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+                        val granted = ContextCompat.checkSelfPermission(
+                            context,
+                            permission
+                        ) == PackageManager.PERMISSION_GRANTED
                         permissionResults[permission] = granted
                     }
                 }
+
                 else -> Unit
             }
         }
@@ -169,6 +183,7 @@ fun rememberBackgroundLocationPermissionState(): PermissionState {
                             ) == PackageManager.PERMISSION_GRANTED
                         } else true
                 }
+
                 else -> Unit
             }
         }
@@ -185,6 +200,7 @@ fun rememberNotificationPermissionState(): PermissionState {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
             rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         }
+
         else -> {
             PermissionState(
                 isGranted = remember { mutableStateOf(true) },

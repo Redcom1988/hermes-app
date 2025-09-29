@@ -6,14 +6,16 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TaskDto (
+data class TaskDto(
     val id: Int,
     val name: String,
     val description: String? = null,
     val deadline: String,
     val status: String,
+    @SerialName("parent_task_id")
     val parentTaskId: Int? = null,
     val note: String? = null,
+    @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")
     val updatedAt: String,

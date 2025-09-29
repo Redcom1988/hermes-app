@@ -4,9 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import dev.redcom1988.hermes.core.util.extension.formatToString
-import dev.redcom1988.hermes.data.local.user.entity.UserEntity
-import dev.redcom1988.hermes.domain.attendance.AttendanceWorkLocation
-import dev.redcom1988.hermes.domain.common.SyncStatus
+import dev.redcom1988.hermes.data.local.account_data.entity.EmployeeEntity
+import dev.redcom1988.hermes.domain.common.WorkLocation
 import java.time.LocalDateTime
 
 const val attendanceEntityTableName = "attendances"
@@ -15,24 +14,24 @@ const val attendanceEntityTableName = "attendances"
     tableName = attendanceEntityTableName,
     foreignKeys = [
         ForeignKey(
-            entity = UserEntity::class,
-            parentColumns = ["userId"],
-            childColumns = ["userId"],
+            entity = EmployeeEntity::class,
+            parentColumns = ["employeeId"],
+            childColumns = ["employeeId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class AttendanceEntity(
     @PrimaryKey val attendanceId: Int,
-    val userId: Int,
+    val employeeId: Int,
     val startTime: String = LocalDateTime.now().formatToString(),
     val endTime: String? = null,
-    val workLocation: AttendanceWorkLocation,
+    val workLocation: WorkLocation,
     val longitude: Double,
     val latitude: Double,
     val imagePath: String?,
     val taskLink: String? = null,
-    val syncStatus: SyncStatus = SyncStatus.CREATED,
+    val isSynced: Boolean = false,
     val isDeleted: Boolean = false,
     val updatedAt: String = LocalDateTime.now().formatToString(),
     val createdAt: String = LocalDateTime.now().formatToString(),

@@ -1,21 +1,28 @@
 package dev.redcom1988.hermes.data.remote.model
 
 import dev.redcom1988.hermes.domain.attendance.Attendance
-import dev.redcom1988.hermes.domain.attendance.AttendanceWorkLocation
+import dev.redcom1988.hermes.domain.common.WorkLocation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AttendanceDto (
+data class AttendanceDto(
     val id: Int,
-    val userId: Int,
+    @SerialName("employee_id")
+    val employeeId: Int,
+    @SerialName("start_time")
     val startTime: String,
+    @SerialName("end_time")
     val endTime: String?,
-    val workLocation: AttendanceWorkLocation,
+    @SerialName("work_location")
+    val workLocation: WorkLocation,
     val longitude: Double,
     val latitude: Double,
+    @SerialName("image_path")
     val imagePath: String?,
+    @SerialName("task_link")
     val taskLink: String?,
+    @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")
     val updatedAt: String,
@@ -26,7 +33,7 @@ data class AttendanceDto (
 fun AttendanceDto.toDomain(): Attendance {
     return Attendance(
         id = this.id,
-        userId = this.userId,
+        employeeId = this.employeeId,
         startTime = this.startTime,
         endTime = this.endTime,
         workLocation = this.workLocation,

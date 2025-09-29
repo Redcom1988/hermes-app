@@ -65,38 +65,39 @@ internal fun SimpleRingColorPicker(
             )
         )
     }
-    Canvas(modifier = modifier
-        .size(280.dp)
-        .aspectRatio(1f)
-        .onSizeChanged {
-            radius = it.width / 2f
-        }
-        .pointerInteropFilter {
-            when (it.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    val length = MathHelper.getLength(it.x, it.y, radius)
-                    val offset = radius - colorWidthPx * tracksCount
-                    val trackProgress =
-                        ((length - offset) / (radius - offset)).coerceIn(0f, 1f)
-                    val progress = ((Math.toDegrees(
-                        atan2(
-                            it.y - radius,
-                            it.x - radius
-                        ).toDouble()
-                    ) + 360) % 360) / 360f
-                    pickerLocation =
-                        IntOffset(
-                            (sectorsCount * progress)
-                                .roundToInt()
-                                .coerceIn(0, sectorsCount),
-                            ((tracksCount.toFloat()) * (1 - trackProgress))
-                                .roundToInt()
-                                .coerceIn(0, tracksCount - 1)
-                        )
-                }
+    Canvas(
+        modifier = modifier
+            .size(280.dp)
+            .aspectRatio(1f)
+            .onSizeChanged {
+                radius = it.width / 2f
             }
-            return@pointerInteropFilter true
-        }) {
+            .pointerInteropFilter {
+                when (it.action) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                        val length = MathHelper.getLength(it.x, it.y, radius)
+                        val offset = radius - colorWidthPx * tracksCount
+                        val trackProgress =
+                            ((length - offset) / (radius - offset)).coerceIn(0f, 1f)
+                        val progress = ((Math.toDegrees(
+                            atan2(
+                                it.y - radius,
+                                it.x - radius
+                            ).toDouble()
+                        ) + 360) % 360) / 360f
+                        pickerLocation =
+                            IntOffset(
+                                (sectorsCount * progress)
+                                    .roundToInt()
+                                    .coerceIn(0, sectorsCount),
+                                ((tracksCount.toFloat()) * (1 - trackProgress))
+                                    .roundToInt()
+                                    .coerceIn(0, tracksCount - 1)
+                            )
+                    }
+                }
+                return@pointerInteropFilter true
+            }) {
         repeat(tracksCount) { track ->
             repeat(sectorsCount) {
                 val degree = 360f / sectorsCount * it
@@ -158,6 +159,7 @@ private fun getColorAt(progress: Float, deepProgress: Float): Color {
             blue = 0.0
                 .roundToInt()
         }
+
         ColorRange.YellowToGreen -> {
             red = (255 * (1 - rangeProgress))
                 .roundToInt()
@@ -165,6 +167,7 @@ private fun getColorAt(progress: Float, deepProgress: Float): Color {
             blue = 0.0
                 .roundToInt()
         }
+
         ColorRange.GreenToCyan -> {
             red = 0.0
                 .roundToInt()
@@ -172,6 +175,7 @@ private fun getColorAt(progress: Float, deepProgress: Float): Color {
             blue = (255 * rangeProgress)
                 .roundToInt()
         }
+
         ColorRange.CyanToBlue -> {
             red = 0.0
                 .roundToInt()
@@ -179,6 +183,7 @@ private fun getColorAt(progress: Float, deepProgress: Float): Color {
                 .roundToInt()
             blue = 255
         }
+
         ColorRange.BlueToPurple -> {
             red = (255 * rangeProgress)
                 .roundToInt()
@@ -186,6 +191,7 @@ private fun getColorAt(progress: Float, deepProgress: Float): Color {
                 .roundToInt()
             blue = 255
         }
+
         ColorRange.PurpleToRed -> {
             red = 255
             green = 0.0

@@ -108,73 +108,79 @@ internal fun RingColorPicker(
         onPickedColor(color)
     }
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-        Canvas(modifier = modifier
-            .size(200.dp)
-            .onSizeChanged {
-                radius = it.width.toFloat() / 2
-            }
-            .pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                        val red: Int
-                        val green: Int
-                        val blue: Int
-                        val angle =
-                            (Math.toDegrees(
-                                atan2(
-                                    it.y - radius,
-                                    it.x - radius
-                                ).toDouble()
-                            ) + 360) % 360
-                        val length = getLength(it.x, it.y, radius)
-                        val progress = angle / 360f
-                        val (rangeProgress, range) = ColorPickerHelper.calculateRangeProgress(
-                            progress
-                        )
-                        when (range) {
-                            ColorRange.RedToYellow -> {
-                                red = 255
-                                green = (255f * rangeProgress).roundToInt()
-                                blue = 0
-                            }
-                            ColorRange.YellowToGreen -> {
-                                red = (255 * (1 - rangeProgress)).roundToInt()
-                                green = 255
-                                blue = 0
-                            }
-                            ColorRange.GreenToCyan -> {
-                                red = 0
-                                green = 255
-                                blue = (255 * rangeProgress).roundToInt()
-                            }
-                            ColorRange.CyanToBlue -> {
-                                red = 0
-                                green = (255 * (1 - rangeProgress)).roundToInt()
-                                blue = 255
-                            }
-                            ColorRange.BlueToPurple -> {
-                                red = (255 * rangeProgress).roundToInt()
-                                green = 0
-                                blue = 255
-                            }
-                            ColorRange.PurpleToRed -> {
-                                red = 255
-                                green = 0
-                                blue = (255 * (1 - rangeProgress)).roundToInt()
-                            }
-                        }
-                        pickerLocation = getBoundedPointWithInRadius(
-                            it.x,
-                            it.y,
-                            length,
-                            radius - ringWidthPx / 2,
-                            BoundedPointStrategy.Edge
-                        )
-                        selectedColor = Color(red, green, blue)
-                    }
+        Canvas(
+            modifier = modifier
+                .size(200.dp)
+                .onSizeChanged {
+                    radius = it.width.toFloat() / 2
                 }
-                return@pointerInteropFilter true
-            }) {
+                .pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                            val red: Int
+                            val green: Int
+                            val blue: Int
+                            val angle =
+                                (Math.toDegrees(
+                                    atan2(
+                                        it.y - radius,
+                                        it.x - radius
+                                    ).toDouble()
+                                ) + 360) % 360
+                            val length = getLength(it.x, it.y, radius)
+                            val progress = angle / 360f
+                            val (rangeProgress, range) = ColorPickerHelper.calculateRangeProgress(
+                                progress
+                            )
+                            when (range) {
+                                ColorRange.RedToYellow -> {
+                                    red = 255
+                                    green = (255f * rangeProgress).roundToInt()
+                                    blue = 0
+                                }
+
+                                ColorRange.YellowToGreen -> {
+                                    red = (255 * (1 - rangeProgress)).roundToInt()
+                                    green = 255
+                                    blue = 0
+                                }
+
+                                ColorRange.GreenToCyan -> {
+                                    red = 0
+                                    green = 255
+                                    blue = (255 * rangeProgress).roundToInt()
+                                }
+
+                                ColorRange.CyanToBlue -> {
+                                    red = 0
+                                    green = (255 * (1 - rangeProgress)).roundToInt()
+                                    blue = 255
+                                }
+
+                                ColorRange.BlueToPurple -> {
+                                    red = (255 * rangeProgress).roundToInt()
+                                    green = 0
+                                    blue = 255
+                                }
+
+                                ColorRange.PurpleToRed -> {
+                                    red = 255
+                                    green = 0
+                                    blue = (255 * (1 - rangeProgress)).roundToInt()
+                                }
+                            }
+                            pickerLocation = getBoundedPointWithInRadius(
+                                it.x,
+                                it.y,
+                                length,
+                                radius - ringWidthPx / 2,
+                                BoundedPointStrategy.Edge
+                            )
+                            selectedColor = Color(red, green, blue)
+                        }
+                    }
+                    return@pointerInteropFilter true
+                }) {
             drawCircle(
                 Brush.sweepGradient(gradientColors),
                 radius = radius - ringWidthPx / 2f,

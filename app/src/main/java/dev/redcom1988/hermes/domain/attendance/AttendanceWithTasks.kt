@@ -4,5 +4,5 @@ import dev.redcom1988.hermes.domain.task.Task
 
 data class AttendanceWithTask(
     val attendance: Attendance,
-    val tasks: List<Task>
+    val tasks: List<Task>,
 )

@@ -53,13 +53,13 @@ fun <T> ListSearchPreferenceWidget(
     var isDialogShown by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val searchEntries by remember {
-       derivedStateOf {
-           entries().filter {
-               if (searchQuery.isNotEmpty()) {
-                   it.value.lowercase().contains(searchQuery.lowercase())
-               } else true
-           }
-       }
+        derivedStateOf {
+            entries().filter {
+                if (searchQuery.isNotEmpty()) {
+                    it.value.lowercase().contains(searchQuery.lowercase())
+                } else true
+            }
+        }
     }
 
     TextPreferenceWidget(

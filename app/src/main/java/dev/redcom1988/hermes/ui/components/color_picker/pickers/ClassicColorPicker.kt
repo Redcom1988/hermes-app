@@ -126,26 +126,31 @@ internal fun ClassicColorPicker(
                     green = (255 * rangeProgress).roundToInt()
                     blue = 0
                 }
+
                 ColorRange.YellowToGreen -> {
                     red = (255 * (1 - rangeProgress)).roundToInt()
                     green = 255
                     blue = 0
                 }
+
                 ColorRange.GreenToCyan -> {
                     red = 0
                     green = 255
                     blue = (255 * rangeProgress).roundToInt()
                 }
+
                 ColorRange.CyanToBlue -> {
                     red = 0
                     green = (255 * (1 - rangeProgress)).roundToInt()
                     blue = 255
                 }
+
                 ColorRange.BlueToPurple -> {
                     red = (255 * rangeProgress).roundToInt()
                     green = 0
                     blue = 255
                 }
+
                 ColorRange.PurpleToRed -> {
                     red = 255
                     green = 0

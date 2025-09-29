@@ -1,19 +1,26 @@
 package dev.redcom1988.hermes.domain.meeting
 
-import dev.redcom1988.hermes.data.local.meeting.entity.MeetingEntity
 import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
     fun getMeetingsFlow(): Flow<List<Meeting>>
+    fun getUserLinkFlow(): Flow<List<MeetingUserCrossRef>>
+    fun getClientLinkFlow(): Flow<List<MeetingClientCrossRef>>
     suspend fun addMeeting(
         title: String,
         note: String?,
         startTime: String,
         endTime: String,
     ): Int
-    suspend fun updateMeeting(meeting: Meeting)
+    suspend fun linkUser(meetingId: Int, userId: Int)
+    suspend fun linkClient(meetingId: Int, clientId: Int)
+    suspend fun unlinkUser(meetingId: Int, userId: Int)
+    suspend fun unlinkClient(meetingId: Int, clientId: Int)
+
+    suspend fun update(meeting: Meeting)
     suspend fun deleteMeetingById(meetingId: Int)
-    suspend fun syncMeetings()
-    suspend fun getPendingSyncMeetings(): List<MeetingEntity>
-    suspend fun clearLocalMeetings()
+    suspend fun getPendingSyncMeetings(): List<Meeting>
+    suspend fun getPendingSyncMeetingClients(): List<MeetingClientCrossRef>
+    suspend fun getPendingSyncMeetingUsers(): List<MeetingUserCrossRef>
+    suspend fun clearLocalMeetingData()
 }

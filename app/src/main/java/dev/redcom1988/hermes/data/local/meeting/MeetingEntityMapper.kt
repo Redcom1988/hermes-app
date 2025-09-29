@@ -1,7 +1,6 @@
 package dev.redcom1988.hermes.data.local.meeting
 
 import dev.redcom1988.hermes.data.local.meeting.entity.MeetingEntity
-import dev.redcom1988.hermes.domain.common.SyncStatus
 import dev.redcom1988.hermes.domain.meeting.Meeting
 
 fun MeetingEntity.toDomain() = Meeting(
@@ -15,7 +14,7 @@ fun MeetingEntity.toDomain() = Meeting(
     createdAt = createdAt
 )
 
-fun Meeting.toEntity() = MeetingEntity(
+fun Meeting.toEntity(isSynced: Boolean = true) = MeetingEntity(
     meetingId = id,
     title = title,
     note = note,
@@ -24,5 +23,5 @@ fun Meeting.toEntity() = MeetingEntity(
     isDeleted = isDeleted,
     updatedAt = updatedAt,
     createdAt = createdAt,
-    syncStatus = SyncStatus.UNCHANGED,
+    isSynced = isSynced
 )

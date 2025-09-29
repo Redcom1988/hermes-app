@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 val Google: ImageVector
     get() {
         if (_Google != null) return _Google!!
-        
+
         _Google = ImageVector.Builder(
             name = "Google",
             defaultWidth = 16.dp,
@@ -41,7 +41,7 @@ val Google: ImageVector
                 close()
             }
         }.build()
-        
+
         return _Google!!
     }
 

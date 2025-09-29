@@ -103,4 +103,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.font.awesome)
 
+    implementation(libs.location)
+
+
 }

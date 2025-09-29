@@ -1,6 +1,6 @@
 package dev.redcom1988.hermes.domain.task
 
-enum class TaskStatus (val label: String) {
+enum class TaskStatus(val label: String) {
     PENDING("Pending"),
     IN_PROGRESS("In Progress"),
     COMPLETED("Completed"),

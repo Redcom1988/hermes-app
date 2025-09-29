@@ -15,14 +15,14 @@ fun ClientEntity.toDomain() = Client(
     createdAt = createdAt,
 )
 
-fun Client.toEntity() = ClientEntity(
+fun Client.toEntity(isSynced: Boolean = true) = ClientEntity(
     clientId = id,
     fullName = fullName,
     phoneNumber = phoneNumber,
     email = email,
     address = address,
+    isSynced = isSynced,
     isDeleted = isDeleted,
     updatedAt = updatedAt,
     createdAt = createdAt,
-    syncStatus = SyncStatus.UNCHANGED
 )

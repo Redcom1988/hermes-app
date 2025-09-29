@@ -1,8 +1,6 @@
 package dev.redcom1988.hermes.domain.task
 
-import dev.redcom1988.hermes.data.local.task.entity.TaskWithSubTasks
-
-class Task (
+data class Task(
     val id: Int,
     val name: String,
     val description: String?,
@@ -10,7 +8,7 @@ class Task (
     val status: TaskStatus,
     val parentTaskId: Int? = null,
     val note: String? = null,
-    val isDeleted: Boolean,
+    val isDeleted: Boolean = false,
     val updatedAt: String,
     val createdAt: String,
 )

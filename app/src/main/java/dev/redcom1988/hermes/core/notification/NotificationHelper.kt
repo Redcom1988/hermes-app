@@ -16,7 +16,8 @@ class NotificationHelper(
 ) {
 
     private val TAG = "NotificationHelper"
-    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     /**
      * Data class to hold configuration for a notification.
@@ -157,7 +158,10 @@ class NotificationHelper(
         notification: Notification
     ) {
         if (notificationId == 0) {
-            Log.w(TAG, "Notification ID is 0. This is allowed but can be problematic for startForeground.")
+            Log.w(
+                TAG,
+                "Notification ID is 0. This is allowed but can be problematic for startForeground."
+            )
             // startForeground requires a non-zero ID.
         }
         val notificationManager =

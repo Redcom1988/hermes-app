@@ -5,12 +5,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ClientDto (
+data class ClientDto(
     val id: Int,
+    @SerialName("full_name")
     val fullName: String,
+    @SerialName("phone_number")
     val phoneNumber: String,
     val email: String,
     val address: String,
+    @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")
     val updatedAt: String,

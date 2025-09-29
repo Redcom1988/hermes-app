@@ -1,40 +1,53 @@
 package dev.redcom1988.hermes.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import dev.redcom1988.hermes.core.util.extension.injectLazy
+import dev.redcom1988.hermes.ui.screen.settings.SettingsPreference
+import dev.redcom1988.hermes.ui.util.collectAsState
 
 @Composable
-fun SubslyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+fun HermesTheme(
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
+    val settingsPreference by remember { injectLazy<SettingsPreference>() }
+    val appTheme by settingsPreference.appTheme().collectAsState()
+
+    val colorScheme = when (appTheme) {
+        SettingsPreference.AppTheme.LIGHT -> FilamentLightColorScheme
+        SettingsPreference.AppTheme.DARK -> FilamentDarkColorScheme
+        SettingsPreference.AppTheme.SYSTEM ->
+            if (isSystemInDarkTheme()) FilamentDarkColorScheme else FilamentLightColorScheme
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.background),
-    ) {
+
+    SystemBarColor(
+        color = colorScheme.surface,
+        darkTheme = when (appTheme) {
+            SettingsPreference.AppTheme.LIGHT -> false
+            SettingsPreference.AppTheme.DARK -> true
+            SettingsPreference.AppTheme.SYSTEM -> isSystemInDarkTheme()
+        }
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,
-            content = content,
+            shapes = Shapes,
+            content = content
         )
     }
 }

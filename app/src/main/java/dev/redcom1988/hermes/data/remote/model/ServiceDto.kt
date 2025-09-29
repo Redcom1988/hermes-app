@@ -7,12 +7,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ServiceDto(
     val id: Int,
+    @SerialName("client_id")
     val clientId: Int,
+    @SerialName("service_type_id")
     val serviceTypeId: Int,
     val status: String,
     val price: Int,
+    @SerialName("start_time")
     val startTime: String,
+    @SerialName("expired_time")
     val expireTime: String,
+    @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")
     val updatedAt: String,

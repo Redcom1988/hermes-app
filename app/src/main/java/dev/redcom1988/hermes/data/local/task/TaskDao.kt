@@ -6,58 +6,94 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import dev.redcom1988.hermes.core.util.extension.toLocalDateTime
 import dev.redcom1988.hermes.data.local.task.entity.TaskEntity
-import dev.redcom1988.hermes.data.local.task.entity.TaskWithSubTasks
-import dev.redcom1988.hermes.data.local.task.entity.TaskWithUsers
-import dev.redcom1988.hermes.data.local.user.entity.UserWithTasks
-import dev.redcom1988.hermes.domain.common.SyncStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
 
+    @Query("SELECT * FROM tasks WHERE isSynced = 0")
+    suspend fun getPendingSyncTasks(): List<TaskEntity>
 
-     @Query("SELECT * FROM tasks")
-     suspend fun getAllTasks(): List<TaskEntity>
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasks(): List<TaskEntity>
 
-     @Query("SELECT * FROM tasks WHERE isDeleted = 0 AND syncStatus != 'DELETED'")
-     fun getVisibleTasksFlow(): Flow<List<TaskEntity>>
+    @Query("SELECT * FROM tasks WHERE isDeleted = 0 AND parentTaskId = :taskId")
+    suspend fun getTasksByParentId(taskId: Int): List<TaskEntity>
 
-     @Transaction
-     @Query("SELECT * FROM users WHERE userId = :userId")
-     fun getUserWithTasksFlow(userId: Int): Flow<UserWithTasks>
+    @Query("SELECT * FROM tasks WHERE isDeleted = 0 AND isDeleted = 0")
+    fun getVisibleTasksFlow(): Flow<List<TaskEntity>>
 
-     @Transaction
-     @Query("SELECT * FROM tasks WHERE taskId = :taskId AND isDeleted = 0 AND syncStatus != 'DELETED'")
-     fun getTaskWithUsersFlow(taskId: Int): Flow<TaskWithUsers>
+    @Query("SELECT MIN(taskId) FROM tasks WHERE taskId < 0")
+    suspend fun getMinTempTaskId(): Int?
 
-     @Transaction
-     @Query("SELECT * FROM tasks WHERE isDeleted = 0 AND syncStatus != 'DELETED'")
-     fun getTasksWithSubTasksFlow(): Flow<List<TaskWithSubTasks>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTask(task: TaskEntity)
 
-     @Query("SELECT MIN(taskId) FROM tasks WHERE taskId < 0")
-     suspend fun getMinTempTaskId(): Int?
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTasks(tasks: List<TaskEntity>)
 
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insertTask(task: TaskEntity)
+    @Update
+    suspend fun updateTask(task: TaskEntity)
 
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insertTasks(tasks: List<TaskEntity>)
+    @Query("UPDATE tasks SET isDeleted = 1, isSynced = 0, updatedAt = :updatedAt WHERE taskId = :taskId")
+    suspend fun softDeleteTaskById(taskId: Int, updatedAt: String)
 
-     @Update
-     suspend fun updateTask(task: TaskEntity)
+    @Query("UPDATE tasks SET isDeleted = 1, isSynced = 0, updatedAt = :updatedAt WHERE parentTaskId = :taskId")
+    suspend fun softDeleteSubTasksByParentId(taskId: Int, updatedAt: String)
 
-     @Query("UPDATE tasks SET syncStatus = :status where taskId = :id")
-     suspend fun softDeleteTaskById(id: Int, status: SyncStatus = SyncStatus.DELETED)
+    @Query("SELECT * FROM tasks WHERE taskId = :taskId")
+    suspend fun getTaskById(taskId: Int): TaskEntity?
 
-    @Query("UPDATE tasks SET syncStatus = :status WHERE parentTaskId = :parentId")
-    suspend fun softDeleteSubTasksOf(parentId: Int, status: SyncStatus = SyncStatus.DELETED)
+    @Query("SELECT * FROM tasks WHERE parentTaskId = :taskId")
+    fun getSubTasksByParentId(taskId: Int): Flow<List<TaskEntity>>
+
+    @Transaction
+    suspend fun upsertTask(task: TaskEntity) {
+        val existing = getTaskById(task.taskId)
+        if (existing != null) {
+            updateTask(task.copy(isSynced = false))
+        } else {
+            insertTask(task)
+        }
+    }
+
+    @Transaction
+    suspend fun upsertRemoteTask(task: TaskEntity) {
+        val existing = getTaskById(task.taskId)
+        if (existing != null) {
+            updateTask(task)
+        } else {
+            insertTask(task)
+        }
+    }
+
+    @Transaction
+    suspend fun upsertTasks(tasks: List<TaskEntity>) {
+        tasks.forEach { task ->
+            upsertRemoteTask(task)
+        }
+    }
+
+    @Transaction
+    suspend fun upsertRemoteTaskIfClean(remote: TaskEntity) {
+        val local = getTaskById(remote.taskId)
+
+        when {
+            // No local → insert remote
+            local == null -> insertTask(remote)
+
+            // Local has unsynced changes → keep local, else last write wins
+            !local.isSynced -> return
+            remote.updatedAt.toLocalDateTime() > local.updatedAt.toLocalDateTime() -> insertTask(remote)
+
+            else -> return
+        }
+    }
 
 
-    @Query("SELECT * FROM tasks WHERE syncStatus IN ('CREATED', 'UPDATED', 'DELETED')")
-     suspend fun getPendingSyncTasks(): List<TaskEntity>
-
-     @Query("DELETE FROM tasks")
-     suspend fun deleteAllTasks()
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
 
 }

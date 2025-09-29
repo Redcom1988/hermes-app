@@ -10,10 +10,10 @@ data class FieldWithValue(
         parentColumn = "fieldId",
         entityColumn = "fieldId",
         associateBy = androidx.room.Junction(
-            value = ServiceTypeDataEntity::class,
+            value = ServiceTypeDataCrossRefEntity::class,
             parentColumn = "fieldId",
             entityColumn = "fieldId"
         )
     )
-    val values: List<ServiceTypeDataEntity>
+    val values: List<ServiceTypeDataCrossRefEntity>
 )
