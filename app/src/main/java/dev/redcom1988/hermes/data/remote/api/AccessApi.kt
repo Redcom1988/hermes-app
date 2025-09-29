@@ -1,7 +1,0 @@
-package dev.redcom1988.hermes.data.remote.api
-
-import okhttp3.Response
-
-interface AccessApi {
-    suspend fun getAccesses(): Response
-}
