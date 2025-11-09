@@ -4,6 +4,7 @@ import androidx.room.Transaction
 import dev.redcom1988.hermes.core.util.extension.formattedNow
 import dev.redcom1988.hermes.core.util.extension.toLocalDateTime
 import dev.redcom1988.hermes.data.local.attendance.entity.AttendanceEntity
+import dev.redcom1988.hermes.data.local.task.TaskDao
 import dev.redcom1988.hermes.data.local.task.toDomain
 import dev.redcom1988.hermes.data.remote.api.AttendanceApi
 import dev.redcom1988.hermes.data.remote.model.requests.AttendanceApiRequestDto
@@ -17,6 +18,7 @@ import dev.redcom1988.hermes.domain.attendance.toDto
 import dev.redcom1988.hermes.domain.common.WorkLocation
 import dev.redcom1988.hermes.domain.task.AttendanceTaskCrossRef
 import dev.redcom1988.hermes.domain.task.Task
+import dev.redcom1988.hermes.domain.task.TaskStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +36,7 @@ import kotlin.time.toKotlinDuration
 class AttendanceRepositoryImpl(
     private val attendanceDao: AttendanceDao,
     private val attendanceTaskDao: AttendanceTaskDao,
+    private val taskDao: TaskDao,
     private val api: AttendanceApi
 ) : AttendanceRepository {
 
@@ -93,6 +96,7 @@ class AttendanceRepositoryImpl(
 
             taskIds?.forEach { taskId ->
                 attendanceTaskDao.upsertLink(updated.attendanceId, taskId)
+                taskDao.markTaskAsCompleted(taskId, TaskStatus.COMPLETED, formattedNow())
             }
         }
     }

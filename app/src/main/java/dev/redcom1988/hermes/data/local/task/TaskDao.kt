@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import dev.redcom1988.hermes.core.util.extension.toLocalDateTime
 import dev.redcom1988.hermes.data.local.task.entity.TaskEntity
+import dev.redcom1988.hermes.domain.task.TaskStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -45,6 +46,9 @@ interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE taskId = :taskId")
     suspend fun getTaskById(taskId: Int): TaskEntity?
+
+    @Query("UPDATE tasks SET status = :status AND isSynced = 0 AND updatedAt = :updatedAt WHERE taskId = :taskId")
+    suspend fun markTaskAsCompleted(taskId: Int, status: TaskStatus, updatedAt: String)
 
     @Query("SELECT * FROM tasks WHERE parentTaskId = :taskId")
     fun getSubTasksByParentId(taskId: Int): Flow<List<TaskEntity>>
