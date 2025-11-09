@@ -209,7 +209,8 @@ val dataModule = module {
         AttendanceRepositoryImpl(
             attendanceDao = get(),
             api = get(),
-            attendanceTaskDao = get()
+            attendanceTaskDao = get(),
+            taskDao = get()
         )
     }
 
