@@ -128,14 +128,15 @@ data class MeetingDetailScreen(
                     screenModel.hideAddClientDialog()
                 },
                 onDismiss = screenModel::hideAddClientDialog,
-                itemName = { it.fullName }
+                itemName = { it.fullName },
+                itemSubtitle = { "Client ID: ${it.id}" }
             )
         }
 
         // Add User Dialog
         if (state.showAddUserDialog) {
             SelectAttendeesDialog(
-                title = "Add Users to Meeting",
+                title = "Add Team to Meeting",
                 items = state.availableUsers.filter { user ->
                     !state.assignedUsers.any { assignedUser -> assignedUser.id == user.id }
                 },
@@ -146,7 +147,8 @@ data class MeetingDetailScreen(
                     screenModel.hideAddUserDialog()
                 },
                 onDismiss = screenModel::hideAddUserDialog,
-                itemName = { user -> "${user.email} (${user.role})" }
+                itemName = { user -> user.email },
+                itemSubtitle = { user -> "${user.role} • User ID: ${user.id}" }
             )
         }
     }
@@ -724,7 +726,8 @@ private fun <T> SelectAttendeesDialog(
     items: List<T>,
     onSave: (List<Int>) -> Unit,
     onDismiss: () -> Unit,
-    itemName: (T) -> String
+    itemName: (T) -> String,
+    itemSubtitle: (T) -> String
 ) where T : Any {
     var selectedIds by remember { mutableStateOf(setOf<Int>()) }
 
@@ -734,7 +737,9 @@ private fun <T> SelectAttendeesDialog(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -743,32 +748,39 @@ private fun <T> SelectAttendeesDialog(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 300.dp)
-                ) {
-                    items(items) { item ->
-                        val itemId = when (item) {
-                            is Client -> item.id
-                            is User -> item.id
-                            else -> 0
-                        }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedIds.contains(itemId),
-                                onCheckedChange = { checked ->
+                if (items.isEmpty()) {
+                    Text(
+                        text = "No items available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.height(300.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        items(items) { item ->
+                            val itemId = when (item) {
+                                is Client -> item.id
+                                is User -> item.id
+                                else -> 0
+                            }
+                            val isSelected = itemId in selectedIds
+
+                            SelectionItemCard(
+                                name = itemName(item),
+                                subtitle = itemSubtitle(item),
+                                isSelected = isSelected,
+                                onSelectionChanged = { checked ->
                                     selectedIds = if (checked) {
                                         selectedIds + itemId
                                     } else {
@@ -776,16 +788,11 @@ private fun <T> SelectAttendeesDialog(
                                     }
                                 }
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = itemName(item),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -794,16 +801,73 @@ private fun <T> SelectAttendeesDialog(
                     TextButton(onClick = onDismiss) {
                         Text("Cancel")
                     }
+
                     Spacer(modifier = Modifier.width(8.dp))
+
                     Button(
                         onClick = {
                             onSave(selectedIds.toList())
                         },
-                        enabled = selectedIds.isNotEmpty()
+                        enabled = selectedIds.isNotEmpty(),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Add Selected")
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectionItemCard(
+    name: String,
+    subtitle: String,
+    isSelected: Boolean,
+    onSelectionChanged: (Boolean) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = onSelectionChanged
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

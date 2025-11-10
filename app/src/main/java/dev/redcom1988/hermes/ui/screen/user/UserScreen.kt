@@ -33,9 +33,9 @@ object UserScreen : Screen {
 
         ScreenLayout(
             screen = this,
-            title = "Users",
+            title = "Employee Accounts",
             isLoading = state.isLoading,
-            loadingText = "Loading users...",
+            loadingText = "Loading Employee Accounts...",
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

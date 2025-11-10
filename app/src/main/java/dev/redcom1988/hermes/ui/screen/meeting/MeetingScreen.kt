@@ -524,7 +524,7 @@ private fun CreateEditMeetingDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = if (isEditing) "Edit Meeting" else "Create Meeting",
+                    text = if (isEditing) "Edit Meeting Record" else "Create Meeting Record",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 20.dp)
