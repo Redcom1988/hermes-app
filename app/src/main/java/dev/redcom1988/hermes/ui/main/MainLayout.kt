@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MeetingRoom
@@ -155,7 +157,7 @@ fun ScreenLayout(
                             }
                         )
                         SidebarItem(
-                            title = "Users",
+                            title = "Employee Accounts",
                             icon = Icons.Default.SupervisorAccount,
                             selected = screen == UserScreen,
                             onClick = {
@@ -192,7 +194,7 @@ fun ScreenLayout(
                         )
                         SidebarItem(
                             title = "Clients",
-                            icon = Icons.Default.AccountTree,
+                            icon = Icons.Default.Contacts,
                             selected = screen == ClientScreen,
                             onClick = {
                                 navigator.push(ClientScreen)
@@ -201,7 +203,7 @@ fun ScreenLayout(
                         )
                         SidebarItem(
                             title = "Services",
-                            icon = Icons.Default.MiscellaneousServices,
+                            icon = Icons.Default.Construction,
                             selected = screen == ServiceScreen,
                             onClick = {
                                 navigator.push(ServiceScreen)
