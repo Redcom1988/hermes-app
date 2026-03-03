@@ -1,7 +1,6 @@
 package dev.redcom1988.hermes.data.sync
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -16,11 +15,8 @@ import dev.redcom1988.hermes.core.util.extension.workManager
 import dev.redcom1988.hermes.data.local.auth.UserPreference
 import dev.redcom1988.hermes.domain.auth.SyncRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
@@ -39,6 +35,7 @@ class SyncDataJob(
             val forceClear = inputData.getBoolean(KEY_FORCE_CLEAR, false)
 
             syncRepository.performSync(lastSyncTime, forceClear)
+            
             Result.success()
 
         } catch (e: HttpException) {
@@ -59,10 +56,6 @@ class SyncDataJob(
         private const val WORK_NAME = "SyncData"
         private const val KEY_FORCE_CLEAR = "forceClear"
 
-        // Shared StateFlow instance to prevent multiple observers
-        @Volatile
-        private var _sharedSyncStateFlow: StateFlow<Boolean>? = null
-
         fun syncState(
             context: Context,
             scope: CoroutineScope
@@ -82,51 +75,22 @@ class SyncDataJob(
         }
 
         fun isSyncing(context: Context, scope: CoroutineScope): StateFlow<Boolean> {
-            // Clean up any potentially stale work entries first
-            cleanupStaleWork(context)
-
-            // Return existing shared instance if available
-            _sharedSyncStateFlow?.let { return it }
-
-            // Create new shared instance
             val workQuery = WorkQuery.Builder.fromTags(listOf(WORK_NAME)).build()
-            val newStateFlow = context.workManager
+            return context.workManager
                 .getWorkInfosFlow(workQuery)
                 .map { infos ->
-                    val result = infos.any { workInfo ->
+                    infos.any { workInfo ->
                         when (workInfo.state) {
                             WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> true
                             else -> false
                         }
                     }
-                    Log.d("SyncState", "WorkInfos: ${infos.size}, States: ${infos.map { "${it.id}-${it.state}" }}, Result: $result")
-                    result
                 }
                 .stateIn(
                     scope,
-                    SharingStarted.WhileSubscribed(5000),
+                    SharingStarted.Eagerly,
                     false
                 )
-
-            _sharedSyncStateFlow = newStateFlow
-            return newStateFlow
-        }
-
-        // Clean up any stale work entries
-        private fun cleanupStaleWork(context: Context) {
-            try {
-                val workManager = context.workManager
-                // Cancel any stuck work items and clear completed ones
-                workManager.cancelUniqueWork(WORK_NAME)
-                workManager.pruneWork()
-            } catch (e: Exception) {
-                Log.e("SyncDataJob", "Failed to cleanup stale work", e)
-            }
-        }
-
-        // Function to reset the shared state (useful for testing or when needed)
-        fun resetSyncState() {
-            _sharedSyncStateFlow = null
         }
 
         fun start(
@@ -134,7 +98,9 @@ class SyncDataJob(
             forceClear: Boolean = false
         ): Boolean {
             val workManager = context.workManager
-            if (workManager.isRunning(WORK_NAME)) {
+            val isRunning = workManager.isRunning(WORK_NAME)
+            
+            if (isRunning) {
                 return false
             }
 
@@ -142,6 +108,7 @@ class SyncDataJob(
                 .addTag(WORK_NAME)
                 .setInputData(workDataOf(KEY_FORCE_CLEAR to forceClear))
                 .build()
+            
             workManager.enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, request)
             return true
         }

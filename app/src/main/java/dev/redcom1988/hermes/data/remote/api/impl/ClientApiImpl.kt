@@ -1,6 +1,5 @@
 package dev.redcom1988.hermes.data.remote.api.impl
 
-import android.util.Log
 import dev.redcom1988.hermes.core.network.GET
 import dev.redcom1988.hermes.core.network.NetworkHelper
 import dev.redcom1988.hermes.core.network.POST
@@ -25,8 +24,6 @@ class ClientApiImpl(
     override suspend fun pushClientChanges(request: ClientApiRequestDto): Response {
         val json = Json.encodeToString(ClientApiRequestDto.serializer(), request)
         val requestBody = json.toRequestBody("application/json".toMediaType())
-        Log.d("ASD", "pushClientChanges: $json")
-        Log.d("ASD", "RequestBody: $requestBody")
         val requestObj = POST("$baseUrl/clients/sync", body = requestBody)
         return networkHelper.client.newCall(requestObj).await()
     }

@@ -1,6 +1,5 @@
 package dev.redcom1988.hermes.data.remote.api.impl
 
-import android.util.Log
 import dev.redcom1988.hermes.core.network.GET
 import dev.redcom1988.hermes.core.network.NetworkHelper
 import dev.redcom1988.hermes.core.network.POST
@@ -20,9 +19,6 @@ class WorkhourPlanApiImpl(
     override suspend fun getWorkhourPlans(): Response {
         val request = GET("$baseUrl/workhour-plans")
         val response = networkHelper.client.newCall(request).await()
-
-        Log.d("ASD", "getWorkhourPlans: ${response.code} ${response.message}")
-
         return response
     }
 

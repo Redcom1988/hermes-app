@@ -87,7 +87,8 @@ fun ScreenLayout(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current.applicationContext
-    val isSyncing by SyncDataJob.isSyncing(context, scope).collectAsState()
+    val syncingStateFlow = remember(context, scope) { SyncDataJob.isSyncing(context, scope) }
+    val isSyncing by syncingStateFlow.collectAsState()
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     val viewportSize = LocalConfiguration.current.screenWidthDp.dp
