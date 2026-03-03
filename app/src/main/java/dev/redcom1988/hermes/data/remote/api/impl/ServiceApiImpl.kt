@@ -8,11 +8,11 @@ import okhttp3.Response
 
 class ServiceApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseURL: String = "https://api.example.com/"
+    private val baseUrl: String
 ) : ServiceApi {
 
     override suspend fun getServiceData(): Response {
-        val request = GET("$baseURL/services")
+        val request = GET("$baseUrl/services")
         return networkHelper.client.newCall(request).await()
     }
 

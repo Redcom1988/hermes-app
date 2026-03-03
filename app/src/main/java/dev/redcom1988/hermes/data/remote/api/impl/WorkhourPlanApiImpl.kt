@@ -14,7 +14,7 @@ import okhttp3.Response
 
 class WorkhourPlanApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://mock-api.achmad.dev/hermes"
+    private val baseUrl: String
 ) : WorkhourPlanApi {
 
     override suspend fun getWorkhourPlans(): Response {

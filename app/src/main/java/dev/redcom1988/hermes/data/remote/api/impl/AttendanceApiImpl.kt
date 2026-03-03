@@ -13,7 +13,7 @@ import okhttp3.Response
 
 class AttendanceApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://api.example.com",
+    private val baseUrl: String,
 ) : AttendanceApi {
 
     // Fetches all attendances and tasks from the server

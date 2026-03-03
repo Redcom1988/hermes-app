@@ -9,7 +9,6 @@ import dev.redcom1988.hermes.data.remote.api.BulkSyncApi
 import dev.redcom1988.hermes.data.remote.model.requests.BulkSyncApiRequest
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -23,11 +22,11 @@ data class BulkSyncRequest(
 
 class BulkSyncApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://mock-api.achmad.dev/hermes"
+    private val baseUrl: String
 ) : BulkSyncApi {
 
     override suspend fun getLatestData(lastSyncTime: String): Response {
-        val requestObj = GET("$baseUrl/sync?since=$lastSyncTime")
+        val requestObj = GET("$baseUrl/sync/pull?since=$lastSyncTime")
         Log.d("API", "RequestObj: $requestObj")
         return networkHelper.client.newCall(requestObj).await()
     }

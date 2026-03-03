@@ -8,7 +8,7 @@ import okhttp3.Response
 
 class AccountApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://mock-api.achmad.dev/hermes"
+    private val baseUrl: String
 ) : AccountApi {
 
     override suspend fun getAccountData(): Response {

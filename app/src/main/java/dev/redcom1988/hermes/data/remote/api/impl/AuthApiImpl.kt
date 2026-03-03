@@ -12,7 +12,7 @@ import okhttp3.Response
 
 class AuthApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://mock-api.achmad.dev/hermes"
+    private val baseUrl: String
 ) : AuthApi {
 
     override suspend fun login(request: LoginRequestDto): Response {

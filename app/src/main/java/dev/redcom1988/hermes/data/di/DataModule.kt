@@ -106,55 +106,64 @@ val dataModule = module {
     // apis
     single<AuthApi> {
         AuthApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<AccountApi> {
         AccountApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<AttendanceApi> {
         AttendanceApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<ClientApi> {
         ClientApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<MeetingApi> {
         MeetingApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<ServiceApi> {
         ServiceApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<TaskApi> {
         TaskApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<WorkhourPlanApi> {
         WorkhourPlanApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 
     single<BulkSyncApi> {
         BulkSyncApiImpl(
-            networkHelper = get()
+            networkHelper = get(),
+            baseUrl = BuildConfig.API_BASE_URL
         )
     }
 

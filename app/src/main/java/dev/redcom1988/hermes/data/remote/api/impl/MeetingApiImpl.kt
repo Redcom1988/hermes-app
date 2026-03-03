@@ -3,12 +3,9 @@ package dev.redcom1988.hermes.data.remote.api.impl
 import dev.redcom1988.hermes.core.network.GET
 import dev.redcom1988.hermes.core.network.NetworkHelper
 import dev.redcom1988.hermes.core.network.POST
-import dev.redcom1988.hermes.core.network.PUT
 import dev.redcom1988.hermes.core.util.extension.await
 import dev.redcom1988.hermes.data.remote.api.MeetingApi
-import dev.redcom1988.hermes.data.remote.model.MeetingDto
 import dev.redcom1988.hermes.data.remote.model.requests.MeetingApiRequestDto
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -16,7 +13,7 @@ import okhttp3.Response
 
 class MeetingApiImpl(
     private val networkHelper: NetworkHelper,
-    private val baseUrl: String = "https://api.example.com",
+    private val baseUrl: String,
 ) : MeetingApi {
 
     override suspend fun getMeetingData(): Response {
