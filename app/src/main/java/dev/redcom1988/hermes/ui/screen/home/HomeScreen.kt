@@ -119,7 +119,7 @@ object HomeScreen : Screen {
             TaskSelectionDialog(
                 tasks = state.tasks,
                 onTasksSelected = { selectedTasks ->
-                    screenModel.checkOut(selectedTasks)
+                    screenModel.checkOut(context, selectedTasks)
                     showTaskSelection = false
                 },
                 onDismiss = { showTaskSelection = false }
@@ -306,7 +306,7 @@ private fun WelcomeCard(userName: String, userRole: String, isEmployee: Boolean)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -315,7 +315,7 @@ private fun WelcomeCard(userName: String, userRole: String, isEmployee: Boolean)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(

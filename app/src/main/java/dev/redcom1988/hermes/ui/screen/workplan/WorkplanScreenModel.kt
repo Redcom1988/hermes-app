@@ -31,7 +31,6 @@ data class WorkplanUiState(
     val currentMonth: YearMonth = YearMonth.now(),
     val isDateFilterEnabled: Boolean = false,
     val showOnlyMyPlans: Boolean = false,
-    val showCreateDialog: Boolean = false,
     val userDivision: DivisionType? = null,
     val currentEmployeeId: Int? = null,
     val isAdmin: Boolean = false
@@ -145,50 +144,9 @@ class WorkplanScreenModel : ScreenModel {
         applyFilters()
     }
 
-    fun showCreateDialog() {
-        _state.value = _state.value.copy(showCreateDialog = true)
-    }
-
-    fun hideCreateDialog() {
-        _state.value = _state.value.copy(showCreateDialog = false)
-    }
-
     fun canCreatePlans(): Boolean {
         // Admin can't create plans (no employee ID), but everyone else can
         return !_state.value.isAdmin && _state.value.currentEmployeeId != null
-    }
-
-    fun createPlan(
-        planDate: String,
-        plannedStartTime: String,
-        plannedEndTime: String,
-        workLocation: WorkLocation
-    ) {
-        val currentEmployeeId = _state.value.currentEmployeeId
-        if (currentEmployeeId == null) {
-            _state.value = _state.value.copy(errorMessage = "Cannot create plan: No employee ID found")
-            return
-        }
-
-        screenModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
-            try {
-                workplanRepository.addPlan(
-                    employeeId = currentEmployeeId,
-                    planDate = planDate,
-                    plannedStartTime = plannedStartTime,
-                    plannedEndTime = plannedEndTime,
-                    workLocation = workLocation
-                )
-                hideCreateDialog()
-                _state.value = _state.value.copy(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to create plan: ${e.message}"
-                )
-            }
-        }
     }
 
     fun deletePlan(planId: Int) {

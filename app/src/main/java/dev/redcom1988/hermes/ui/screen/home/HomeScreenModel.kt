@@ -1,6 +1,7 @@
 package dev.redcom1988.hermes.ui.screen.home
 
 import android.content.Context
+import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.redcom1988.hermes.core.util.extension.formatToString
@@ -18,6 +19,7 @@ import dev.redcom1988.hermes.domain.common.WorkLocation
 import dev.redcom1988.hermes.domain.service.ServiceRepository
 import dev.redcom1988.hermes.domain.task.Task
 import dev.redcom1988.hermes.domain.task.TaskRepository
+import dev.redcom1988.hermes.service.AttendanceNotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -411,8 +413,12 @@ class HomeScreenModel : ScreenModel {
                     }
                 )
 
+                // Start foreground notification service
+                AttendanceNotificationService.start(context, currentEmployeeId)
+
                 _state.value = _state.value.copy(isLoading = false, errorMessage = null)
             } catch (e: Exception) {
+                Log.e("HomeScreenModel", "Failed to check in", e)
                 _state.value = _state.value.copy(
                     isLoading = false,
                     errorMessage = "Failed to check in: ${e.message}"
@@ -421,7 +427,7 @@ class HomeScreenModel : ScreenModel {
         }
     }
 
-    fun checkOut(selectedTasks: List<Task> = emptyList()) {
+    fun checkOut(context: Context, selectedTasks: List<Task> = emptyList()) {
         screenModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
@@ -431,6 +437,9 @@ class HomeScreenModel : ScreenModel {
                     endTime = LocalDateTime.now().formatToString(),
                     taskIds = selectedTasks.map { it.id }
                 )
+
+                // Stop foreground notification service
+                AttendanceNotificationService.stop(context)
 
                 _state.value = _state.value.copy(isLoading = false)
             } catch (e: Exception) {

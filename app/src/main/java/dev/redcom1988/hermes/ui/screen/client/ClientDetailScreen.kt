@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.data.local.client.ClientRepositoryImpl.ClientWithData
 import dev.redcom1988.hermes.domain.client.Client
 import dev.redcom1988.hermes.domain.client.ClientData
@@ -31,6 +33,7 @@ data class ClientDetailScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { ClientDetailScreenModel(clientId) }
         val state by screenModel.state.collectAsState()
 
@@ -56,7 +59,7 @@ data class ClientDetailScreen(
                         item {
                             ClientInfoCard(
                                 clientWithData = clientWithData,
-                                onEditClient = screenModel::openEditClientDialog
+                                onEditClient = { navigator.push(EditClientScreen(clientWithData.client.id)) }
                             )
                         }
 
@@ -96,18 +99,6 @@ data class ClientDetailScreen(
                     // Show snackbar or handle error
                 }
             }
-        }
-
-        // Edit Client Dialog
-        if (state.showEditClientDialog) {
-            EditClientDialog(
-                client = state.client?.client,
-                onSave = { client ->
-                    screenModel.updateClient(client)
-                    screenModel.hideEditClientDialog()
-                },
-                onDismiss = screenModel::hideEditClientDialog
-            )
         }
 
         // Add Client Data Dialog
@@ -306,7 +297,7 @@ private fun ClientDataSection(
 private fun ClientDataCard(
     clientData: ClientData,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: (ClientData) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -316,7 +307,7 @@ private fun ClientDataCard(
             .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(
             width = 2.dp,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
@@ -470,7 +461,7 @@ private fun ClientDataCard(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onDelete()
+                        onDelete(clientData)
                         showDeleteDialog = false
                     },
                     colors = ButtonDefaults.textButtonColors(
@@ -545,7 +536,7 @@ private fun ServiceCard(
             .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(
             width = 2.dp,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
@@ -720,120 +711,6 @@ private fun ContactInfoRow(
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditClientDialog(
-    client: Client?,
-    onSave: (Client) -> Unit,
-    onDismiss: () -> Unit
-) {
-    if (client == null) return
-
-    var fullName by remember { mutableStateOf(client.fullName) }
-    var phoneNumber by remember { mutableStateOf(client.phoneNumber) }
-    var email by remember { mutableStateOf(client.email) }
-    var address by remember { mutableStateOf(client.address) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "Edit Client",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                OutlinedTextField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    label = { Text("Full Name") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Person, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
-                    label = { Text("Phone Number") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Phone, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Email, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = address,
-                    onValueChange = { address = it },
-                    label = { Text("Address") },
-                    leadingIcon = {
-                        Icon(Icons.Default.LocationOn, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            val updatedClient = client.copy(
-                                fullName = fullName,
-                                phoneNumber = phoneNumber,
-                                email = email,
-                                address = address
-                            )
-                            onSave(updatedClient)
-                        },
-                        enabled = fullName.isNotBlank()
-                    ) {
-                        Text("Update Client")
-                    }
-                }
-            }
         }
     }
 }

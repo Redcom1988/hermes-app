@@ -22,6 +22,7 @@ interface ClientRepository {
     suspend fun update(clientData: ClientData)
     fun getVisibleClients(): Flow<List<Client>>
     fun getClientWithData(): Flow<List<ClientWithData>>
+    fun getClientById(clientId: Int): Flow<Client?>
     suspend fun softDeleteClientWithLinks(clientId: Int)
     suspend fun softDeleteClientData(clientDataId: Int)
     suspend fun insertClients(clients: List<Client>)

@@ -131,8 +131,8 @@ private fun AttendanceStatusCard(attendance: Attendance) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.tertiaryContainer
         )
@@ -173,7 +173,7 @@ private fun AttendanceTimeCard(attendance: Attendance) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -213,9 +213,10 @@ private fun AttendanceTimeCard(attendance: Attendance) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 val duration = calculateWorkDuration(attendance.startTime, attendance.endTime)
+                
                 AttendanceDetailRow(
                     icon = Icons.Default.Schedule,
-                    label = "Total Duration",
+                    label = "Duration",
                     value = formatWorkDuration(duration),
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -229,7 +230,7 @@ private fun AttendanceLocationCard(attendance: Attendance) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -282,7 +283,7 @@ private fun CompletedTasksCard(completedTasks: List<Task>) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface

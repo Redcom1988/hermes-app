@@ -17,6 +17,9 @@ interface EmployeeDao {
 
     @Query("SELECT * FROM employees WHERE isDeleted = 0")
     fun getVisibleEmployees(): Flow<List<EmployeeEntity>>
+    
+    @Query("SELECT * FROM employees WHERE isDeleted = 0 AND divisionId = :divisionId")
+    fun getEmployeesByDivisionId(divisionId: Int): Flow<List<EmployeeEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmployee(employee: EmployeeEntity)

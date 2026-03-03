@@ -33,6 +33,11 @@ class MeetingRepositoryImpl(
             .map { list -> list.map { it.toDomain() } }
     }
 
+    override fun getMeetingById(meetingId: Int): Flow<Meeting?> {
+        return meetingDao.getMeetingByIdFlow(meetingId)
+            .map { it?.toDomain() }
+    }
+
     override fun getUserLinkFlow(): Flow<List<MeetingUserCrossRef>> {
         return meetingUserDao.getVisibleLinks()
             .map { list -> list.map { it.toDomain() } }

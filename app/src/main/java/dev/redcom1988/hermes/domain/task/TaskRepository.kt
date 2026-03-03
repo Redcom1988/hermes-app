@@ -17,6 +17,7 @@ interface TaskRepository {
     suspend fun softDeleteEmployeeTaskLink(employeeId: Int, taskId: Int)
 
     fun getVisibleTasks(): Flow<List<Task>>
+    fun getTaskById(taskId: Int): Flow<Task?>
     fun getVisibleLinks(): Flow<List<EmployeeTaskCrossRef>>
     fun getSubtaskForTask(taskId: Int): Flow<List<Task>>
     fun getEmployeesForTask(taskId: Int): Flow<List<Employee>>

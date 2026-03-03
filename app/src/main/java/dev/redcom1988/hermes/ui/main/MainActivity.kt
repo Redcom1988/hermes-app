@@ -15,16 +15,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import cafe.adriel.voyager.transitions.ScreenTransition
+import dev.redcom1988.hermes.data.local.auth.UserPreference
+import dev.redcom1988.hermes.domain.attendance.AttendanceRepository
 import dev.redcom1988.hermes.domain.auth.AuthRepository
 import dev.redcom1988.hermes.core.util.extension.injectLazy
+import dev.redcom1988.hermes.service.AttendanceNotificationService
 import dev.redcom1988.hermes.ui.screen.home.HomeScreen
 import dev.redcom1988.hermes.ui.screen.login.LoginScreen
 import dev.redcom1988.hermes.ui.theme.HermesTheme
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import soup.compose.material.motion.animation.materialSharedAxisX
 import soup.compose.material.motion.animation.rememberSlideDistance
 
@@ -56,6 +62,26 @@ class MainActivity : ComponentActivity() {
         )
 
         enableEdgeToEdge()
+        
+        // Check for active attendance and restart service if needed (after reboot/app kill)
+        lifecycleScope.launch {
+            try {
+                val userPreference: UserPreference by injectLazy()
+                val attendanceRepository: AttendanceRepository by injectLazy()
+                
+                val employeeId = userPreference.employeeId().get().takeIf { it != -1 }
+                if (employeeId != null) {
+                    val activeAttendance = attendanceRepository.observeActiveAttendanceForEmployee(employeeId).firstOrNull()
+                    if (activeAttendance != null) {
+                        // Restart service
+                        AttendanceNotificationService.start(this@MainActivity, employeeId)
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently handle errors
+            }
+        }
+        
         setContent {
             HermesTheme {
                 val globalAuthScreenModel = remember { GlobalAuthScreenModel(authRepository) }

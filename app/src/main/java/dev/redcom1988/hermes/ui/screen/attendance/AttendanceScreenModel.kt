@@ -1,6 +1,7 @@
 package dev.redcom1988.hermes.ui.screen.attendance
 
 import android.content.Context
+import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.redcom1988.hermes.core.util.extension.formatToString
@@ -19,6 +20,7 @@ import dev.redcom1988.hermes.domain.common.WorkLocation
 import dev.redcom1988.hermes.domain.task.AttendanceTaskCrossRef
 import dev.redcom1988.hermes.domain.task.Task
 import dev.redcom1988.hermes.domain.task.TaskRepository
+import dev.redcom1988.hermes.service.AttendanceNotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -64,7 +66,6 @@ class AttendanceScreenModel : ScreenModel {
         observeCheckInStatus(employeeId)
         calculateTodayWorkHours()
         updateRequiredWorkHours()
-        startAutoCheckoutMonitoring()
     }
 
     private fun observeCheckInStatus(employeeId: Int?) {
@@ -126,8 +127,12 @@ class AttendanceScreenModel : ScreenModel {
                     }
                 )
 
+                // Start foreground notification service
+                AttendanceNotificationService.start(context, currentEmployeeId)
+
                 _state.value = _state.value.copy(isLoading = false, errorMessage = null)
             } catch (e: Exception) {
+                Log.e("AttendanceScreenModel", "Failed to check in", e)
                 _state.value = _state.value.copy(
                     isLoading = false,
                     errorMessage = "Failed to check in: ${e.message}"
@@ -136,7 +141,7 @@ class AttendanceScreenModel : ScreenModel {
         }
     }
 
-    fun checkOut(selectedTasks: List<Task> = emptyList()) {
+    fun checkOut(context: Context, selectedTasks: List<Task> = emptyList()) {
         screenModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
@@ -147,8 +152,12 @@ class AttendanceScreenModel : ScreenModel {
                     taskIds = selectedTasks.map { it.id }
                 )
 
+                // Stop foreground notification service
+                AttendanceNotificationService.stop(context)
+
                 _state.value = _state.value.copy(isLoading = false)
             } catch (e: Exception) {
+                Log.e("AttendanceScreenModel", "Failed to check out", e)
                 _state.value = _state.value.copy(
                     isLoading = false,
                     errorMessage = "Failed to check out: ${e.message}"
@@ -251,66 +260,6 @@ class AttendanceScreenModel : ScreenModel {
         }
             .onEach { /* State already updated above */ }
             .launchIn(screenModelScope)
-    }
-
-    private fun startAutoCheckoutMonitoring() {
-        if (employeeId == null) return
-
-        screenModelScope.launch {
-            while (true) {
-                kotlinx.coroutines.delay(60_000) // Check every minute
-                checkForAutoCheckout()
-            }
-        }
-    }
-
-    private suspend fun checkForAutoCheckout() {
-        try {
-            val currentState = attendanceRepository.observeActiveAttendanceForEmployee(employeeId!!).first()
-            if (currentState != null) {
-                val requiredHours = _state.value.requiredWorkHours
-                checkAutoCheckout(currentState, requiredHours)
-            }
-        } catch (e: Exception) {
-            // Silently handle errors in background monitoring
-        }
-    }
-
-    private fun checkAutoCheckout(activeAttendance: Attendance?, requiredHours: Int) {
-        if (activeAttendance == null) return
-
-        screenModelScope.launch {
-            try {
-                val startTime = activeAttendance.startTime.toLocalDateTime()
-                val now = LocalDateTime.now()
-                val currentDuration = java.time.Duration.between(startTime, now)
-                val currentHours = currentDuration.toHours()
-
-                // Auto check-out if worked more than required hours + 1 hour
-                val autoCheckoutThreshold = requiredHours + 1
-
-                // Also check if it's past midnight (different day)
-                val isDifferentDay = startTime.toLocalDate() != now.toLocalDate()
-
-                if (currentHours >= autoCheckoutThreshold || isDifferentDay) {
-                    // Auto check-out with no tasks
-                    attendanceRepository.finishAttendance(
-                        employeeId = employeeId!!,
-                        endTime = now.formatToString(),
-                        taskIds = emptyList()
-                    )
-
-                    _state.value = _state.value.copy(
-                        errorMessage = if (isDifferentDay)
-                            "Auto checked-out: Cannot span multiple days"
-                        else
-                            "Auto checked-out: Exceeded work hours by 1+ hour"
-                    )
-                }
-            } catch (e: Exception) {
-                // Handle error silently for auto-checkout
-            }
-        }
     }
 
     private fun getTodayTotalWorkHours(): Int {

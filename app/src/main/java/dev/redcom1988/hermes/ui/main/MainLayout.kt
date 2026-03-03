@@ -1,7 +1,6 @@
 package dev.redcom1988.hermes.ui.main
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,9 +22,7 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DrawerValue
@@ -69,7 +66,6 @@ import dev.redcom1988.hermes.ui.screen.meeting.MeetingScreen
 import dev.redcom1988.hermes.ui.screen.service.ServiceScreen
 import dev.redcom1988.hermes.ui.screen.settings.SettingsScreen
 import dev.redcom1988.hermes.ui.screen.task.TaskScreen
-import dev.redcom1988.hermes.ui.screen.user.UserScreen
 import dev.redcom1988.hermes.ui.screen.workplan.WorkplanScreen
 import kotlinx.coroutines.launch
 
@@ -153,15 +149,6 @@ fun ScreenLayout(
                             selected = screen == TaskScreen,
                             onClick = {
                                 navigator.push(TaskScreen)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        SidebarItem(
-                            title = "Employee Accounts",
-                            icon = Icons.Default.SupervisorAccount,
-                            selected = screen == UserScreen,
-                            onClick = {
-                                navigator.push(UserScreen)
                                 scope.launch { drawerState.close() }
                             }
                         )

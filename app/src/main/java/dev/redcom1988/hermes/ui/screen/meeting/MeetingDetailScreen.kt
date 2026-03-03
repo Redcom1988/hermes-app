@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.domain.meeting.Meeting
 import dev.redcom1988.hermes.domain.client.Client
 import dev.redcom1988.hermes.domain.account_data.model.User
@@ -34,6 +36,7 @@ data class MeetingDetailScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { MeetingDetailScreenModel(meetingId) }
         val state by screenModel.state.collectAsState()
 
@@ -59,7 +62,7 @@ data class MeetingDetailScreen(
                         item {
                             MeetingInfoCard(
                                 meeting = meeting,
-                                onEditMeeting = screenModel::openEditMeetingDialog
+                                onEditMeeting = { navigator.push(EditMeetingScreen(meeting.id)) }
                             )
                         }
 
@@ -100,18 +103,6 @@ data class MeetingDetailScreen(
                     // Show snackbar or handle error
                 }
             }
-        }
-
-        // Edit Meeting Dialog
-        if (state.showEditMeetingDialog) {
-            EditMeetingDialog(
-                meeting = state.meeting,
-                onSave = { meeting ->
-                    screenModel.updateMeeting(meeting)
-                    screenModel.hideEditMeetingDialog()
-                },
-                onDismiss = screenModel::hideEditMeetingDialog
-            )
         }
 
         // Add Client Dialog
@@ -411,7 +402,7 @@ private fun AttendeeCard(
             .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(
             width = 2.dp,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
@@ -606,119 +597,6 @@ private fun ContactInfoRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditMeetingDialog(
-    meeting: Meeting?,
-    onSave: (Meeting) -> Unit,
-    onDismiss: () -> Unit
-) {
-    if (meeting == null) return
-
-    var title by remember { mutableStateOf(meeting.title) }
-    var note by remember { mutableStateOf(meeting.note ?: "") }
-    var startTime by remember { mutableStateOf(meeting.startTime) }
-    var endTime by remember { mutableStateOf(meeting.endTime) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "Edit Meeting",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Meeting Title") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Event, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = { Text("Meeting Note") },
-                    leadingIcon = {
-                        Icon(Icons.AutoMirrored.Filled.Note, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = startTime,
-                    onValueChange = { startTime = it },
-                    label = { Text("Start Time") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Schedule, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = endTime,
-                    onValueChange = { endTime = it },
-                    label = { Text("End Time") },
-                    leadingIcon = {
-                        Icon(Icons.Default.AccessTime, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            val updatedMeeting = meeting.copy(
-                                title = title,
-                                note = note.takeIf { it.isNotBlank() },
-                                startTime = startTime,
-                                endTime = endTime
-                            )
-                            onSave(updatedMeeting)
-                        },
-                        enabled = title.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
-                    ) {
-                        Text("Update Meeting")
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun <T> SelectAttendeesDialog(

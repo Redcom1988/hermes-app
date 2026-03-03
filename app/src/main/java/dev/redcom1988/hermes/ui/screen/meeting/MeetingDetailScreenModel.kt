@@ -27,7 +27,6 @@ data class MeetingDetailUiState(
     val userCrossRefs: List<MeetingUserCrossRef> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val showEditMeetingDialog: Boolean = false,
     val showAddClientDialog: Boolean = false,
     val showAddUserDialog: Boolean = false
 )
@@ -84,14 +83,6 @@ class MeetingDetailScreenModel(
         }.launchIn(screenModelScope)
     }
 
-    fun openEditMeetingDialog() {
-        _state.value = _state.value.copy(showEditMeetingDialog = true)
-    }
-
-    fun hideEditMeetingDialog() {
-        _state.value = _state.value.copy(showEditMeetingDialog = false)
-    }
-
     fun openAddClientDialog() {
         _state.value = _state.value.copy(showAddClientDialog = true)
     }
@@ -106,16 +97,6 @@ class MeetingDetailScreenModel(
 
     fun hideAddUserDialog() {
         _state.value = _state.value.copy(showAddUserDialog = false)
-    }
-
-    fun updateMeeting(meeting: Meeting) {
-        screenModelScope.launch {
-            try {
-                meetingRepository.update(meeting)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(errorMessage = "Failed to update meeting: ${e.message}")
-            }
-        }
     }
 
     fun addClientToMeeting(clientId: Int) {

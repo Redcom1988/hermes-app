@@ -154,7 +154,7 @@ object AttendanceScreen : Screen {
             TaskSelectionDialog(
                 tasks = state.tasks,
                 onTasksSelected = { selectedTasks ->
-                    screenModel.checkOut(selectedTasks)
+                    screenModel.checkOut(context, selectedTasks)
                     showTaskSelection = false
                 },
                 onDismiss = { showTaskSelection = false }
@@ -168,8 +168,8 @@ private fun ErrorCard(message: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
         )
@@ -388,7 +388,7 @@ private fun EmptyAttendanceCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -465,7 +465,7 @@ private fun AttendanceDetailCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp))
+            .shadow(2.dp, RoundedCornerShape(12.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(

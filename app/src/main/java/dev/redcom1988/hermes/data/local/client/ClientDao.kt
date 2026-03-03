@@ -75,6 +75,9 @@ interface ClientDao {
     @Query("SELECT * FROM clients WHERE clientId = :clientId")
     suspend fun getClientById(clientId: Int): ClientEntity?
 
+    @Query("SELECT * FROM clients WHERE clientId = :clientId")
+    fun getClientByIdFlow(clientId: Int): Flow<ClientEntity?>
+
     @Query("SELECT * FROM client_data WHERE dataId = :dataId")
     suspend fun getClientDataById(dataId: Int): ClientDataEntity?
 

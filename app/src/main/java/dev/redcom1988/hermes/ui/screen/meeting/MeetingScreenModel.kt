@@ -24,10 +24,7 @@ data class MeetingUiState(
     val availableUsers: List<User> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val searchQuery: String = "",
-    val showCreateDialog: Boolean = false,
-    val showEditDialog: Boolean = false,
-    val editingMeeting: Meeting? = null,
+    val searchQuery: String = ""
 )
 
 class MeetingScreenModel : ScreenModel {
@@ -79,83 +76,6 @@ class MeetingScreenModel : ScreenModel {
     fun setSearchQuery(query: String) {
         _state.value = _state.value.copy(searchQuery = query)
         applyFilters()
-    }
-
-    fun showCreateDialog() {
-        _state.value = _state.value.copy(
-            showCreateDialog = true,
-            editingMeeting = null
-        )
-    }
-
-    fun showEditDialog(meeting: Meeting) {
-        _state.value = _state.value.copy(
-            showEditDialog = true,
-            editingMeeting = meeting
-        )
-    }
-
-    fun hideDialogs() {
-        _state.value = _state.value.copy(
-            showCreateDialog = false,
-            showEditDialog = false,
-            editingMeeting = null
-        )
-    }
-
-    fun createMeeting(
-        title: String,
-        note: String?,
-        startTime: String,
-        endTime: String,
-        selectedClientIds: List<Int>,
-        selectedUserIds: List<Int>
-    ) {
-        screenModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
-            try {
-                val meetingId = meetingRepository.addMeeting(
-                    title = title,
-                    note = note,
-                    startTime = startTime,
-                    endTime = endTime
-                )
-
-                // Create CrossRef entries for clients
-                selectedClientIds.forEach { clientId ->
-                    meetingRepository.linkClient(meetingId, clientId)
-                }
-
-                // Create CrossRef entries for users
-                selectedUserIds.forEach { userId ->
-                    meetingRepository.linkUser(meetingId, userId)
-                }
-
-                hideDialogs()
-                _state.value = _state.value.copy(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to create meeting: ${e.message}"
-                )
-            }
-        }
-    }
-
-    fun updateMeeting(meeting: Meeting) {
-        screenModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
-            try {
-                meetingRepository.update(meeting)
-                hideDialogs()
-                _state.value = _state.value.copy(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to update meeting: ${e.message}"
-                )
-            }
-        }
     }
 
     fun deleteMeeting(meetingId: Int) {

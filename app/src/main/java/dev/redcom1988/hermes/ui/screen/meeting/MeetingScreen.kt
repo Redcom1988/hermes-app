@@ -50,7 +50,7 @@ object MeetingScreen : Screen {
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     FloatingActionButton(
-                        onClick = screenModel::showCreateDialog,
+                        onClick = { navigator.push(CreateMeetingScreen) },
                         modifier = Modifier.padding(16.dp),
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
@@ -87,8 +87,6 @@ object MeetingScreen : Screen {
                         items(state.filteredMeetings, key = { it.id }) { meeting ->
                             MeetingCard(
                                 meeting = meeting,
-                                onEdit = { screenModel.showEditDialog(meeting) },
-                                onDelete = { screenModel.deleteMeeting(meeting.id) },
                                 onClick = {
                                     navigator.push(
                                         MeetingDetailScreen(
@@ -148,27 +146,6 @@ object MeetingScreen : Screen {
                 }
             }
         }
-
-        // Create/Edit Meeting Dialog
-        if (state.showCreateDialog || state.showEditDialog) {
-            CreateEditMeetingDialog(
-                initialMeeting = state.editingMeeting,
-                onSave = { title, note, startTime, endTime, clientIds, userIds ->
-                    if (state.showEditDialog && state.editingMeeting != null) {
-                        val updatedMeeting = state.editingMeeting!!.copy(
-                            title = title,
-                            note = note,
-                            startTime = startTime,
-                            endTime = endTime
-                        )
-                        screenModel.updateMeeting(updatedMeeting)
-                    } else {
-                        screenModel.createMeeting(title, note, startTime, endTime, clientIds, userIds)
-                    }
-                },
-                onDismiss = screenModel::hideDialogs
-            )
-        }
     }
 }
 
@@ -210,12 +187,8 @@ private fun SearchSection(
 @Composable
 private fun MeetingCard(
     meeting: Meeting,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
     onClick: () -> Unit = {}
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,78 +201,45 @@ private fun MeetingCard(
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-            // Header with meeting info and actions
+            // Header with meeting info
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                Card(
+                    modifier = Modifier.size(40.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Card(
-                        modifier = Modifier.size(40.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Event,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column {
-                        Text(
-                            text = meeting.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = "Meeting ID: ${meeting.id}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
 
-                Row {
-                    IconButton(
-                        onClick = onEdit,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit meeting",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    IconButton(
-                        onClick = { showDeleteDialog = true },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete meeting",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = meeting.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "Meeting ID: ${meeting.id}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -397,34 +337,8 @@ private fun MeetingCard(
             }
         }
     }
-
-    // Delete confirmation dialog
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Meeting") },
-            text = { Text("Are you sure you want to delete '${meeting.title}'? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
+
 
 @Composable
 private fun EmptyStateCard(
@@ -496,126 +410,3 @@ private fun formatDateTime(dateTimeString: String): String {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateEditMeetingDialog(
-    initialMeeting: Meeting? = null,
-    onSave: (String, String?, String, String, List<Int>, List<Int>) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var title by remember { mutableStateOf(initialMeeting?.title ?: "") }
-    var note by remember { mutableStateOf(initialMeeting?.note ?: "") }
-    var startTime by remember { mutableStateOf(initialMeeting?.startTime ?: "") }
-    var endTime by remember { mutableStateOf(initialMeeting?.endTime ?: "") }
-
-    val isEditing = initialMeeting != null
-
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = if (isEditing) "Edit Meeting Record" else "Create Meeting Record",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                // Title
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Meeting Title") },
-                    placeholder = { Text("Enter meeting title") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Event, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Note
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = { Text("Meeting Note (Optional)") },
-                    placeholder = { Text("Enter meeting notes") },
-                    leadingIcon = {
-                        Icon(Icons.AutoMirrored.Filled.Note, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Start Time
-                OutlinedTextField(
-                    value = startTime,
-                    onValueChange = { startTime = it },
-                    label = { Text("Start Time") },
-                    placeholder = { Text("yyyy-MM-dd'T'HH:mm") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Schedule, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // End Time
-                OutlinedTextField(
-                    value = endTime,
-                    onValueChange = { endTime = it },
-                    label = { Text("End Time") },
-                    placeholder = { Text("yyyy-MM-dd'T'HH:mm") },
-                    leadingIcon = {
-                        Icon(Icons.Default.AccessTime, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            onSave(
-                                title,
-                                note.takeIf { it.isNotBlank() },
-                                startTime,
-                                endTime,
-                                emptyList(), // Client assignment will be done in detail screen
-                                emptyList()  // User assignment will be done in detail screen
-                            )
-                        },
-                        enabled = title.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
-                    ) {
-                        Text(if (isEditing) "Update Meeting" else "Create Meeting")
-                    }
-                }
-            }
-        }
-    }
-}

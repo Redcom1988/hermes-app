@@ -16,7 +16,6 @@ data class ClientDetailUiState(
     val client: ClientWithData? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val showEditClientDialog: Boolean = false,
     val showAddDataDialog: Boolean = false,
     val showEditDataDialog: Boolean = false,
     val editingClientData: ClientData? = null
@@ -55,14 +54,6 @@ class ClientDetailScreenModel(
         }
     }
 
-    fun openEditClientDialog() {
-        _state.value = _state.value.copy(showEditClientDialog = true)
-    }
-
-    fun hideEditClientDialog() {
-        _state.value = _state.value.copy(showEditClientDialog = false)
-    }
-
     fun openAddDataDialog() {
         _state.value = _state.value.copy(showAddDataDialog = true)
 
@@ -85,16 +76,6 @@ class ClientDetailScreenModel(
             editingClientData = null,
             showEditDataDialog = false
         )
-    }
-
-    fun updateClient(client: Client) {
-        screenModelScope.launch {
-            try {
-                clientRepository.update(client)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(errorMessage = "Failed to update client: ${e.message}")
-            }
-        }
     }
 
     fun addClientData(accountType: String, accountCredentials: String, accountPassword: String) {

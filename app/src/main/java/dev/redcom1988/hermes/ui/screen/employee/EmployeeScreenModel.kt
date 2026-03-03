@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import dev.redcom1988.hermes.core.util.extension.injectLazy
 import dev.redcom1988.hermes.domain.account_data.AccountRepository
 import dev.redcom1988.hermes.domain.account_data.model.Employee
+import dev.redcom1988.hermes.domain.account_data.model.Division
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class EmployeeUiState(
     val employees: List<Employee> = emptyList(),
+    val divisions: List<Division> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -33,6 +35,7 @@ class EmployeeScreenModel : ScreenModel {
                 .collect { accountData ->
                     _state.value = _state.value.copy(
                         employees = accountData.employees,
+                        divisions = accountData.divisions,
                         isLoading = false,
                         errorMessage = null
                     )

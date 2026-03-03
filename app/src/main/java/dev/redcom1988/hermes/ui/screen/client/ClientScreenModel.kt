@@ -18,10 +18,7 @@ data class ClientUiState(
     val filteredClients: List<ClientWithData> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val searchQuery: String = "",
-    val showCreateDialog: Boolean = false,
-    val showEditDialog: Boolean = false,
-    val editingClient: Client? = null,
+    val searchQuery: String = ""
 )
 
 class ClientScreenModel : ScreenModel {
@@ -64,65 +61,6 @@ class ClientScreenModel : ScreenModel {
     fun setSearchQuery(query: String) {
         _state.value = _state.value.copy(searchQuery = query)
         applyFilters()
-    }
-
-    fun showCreateDialog() {
-        _state.value = _state.value.copy(
-            showCreateDialog = true,
-            editingClient = null
-        )
-    }
-
-    fun showEditDialog(client: Client) {
-        _state.value = _state.value.copy(
-            showEditDialog = true,
-            editingClient = client
-        )
-    }
-
-    fun hideDialogs() {
-        _state.value = _state.value.copy(
-            showCreateDialog = false,
-            showEditDialog = false,
-            editingClient = null
-        )
-    }
-
-    fun addClient(client: Client) {
-        screenModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
-            try {
-                clientRepository.addClient(
-                    fullName = client.fullName,
-                    phoneNumber = client.phoneNumber,
-                    email = client.email,
-                    address = client.address
-                )
-                hideDialogs()
-                _state.value = _state.value.copy(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to create client: ${e.message}"
-                )
-            }
-        }
-    }
-
-    fun updateClient(client: Client) {
-        screenModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
-            try {
-                clientRepository.update(client)
-                hideDialogs()
-                _state.value = _state.value.copy(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to update client: ${e.message}"
-                )
-            }
-        }
     }
 
     fun deleteClient(clientId: Int) {

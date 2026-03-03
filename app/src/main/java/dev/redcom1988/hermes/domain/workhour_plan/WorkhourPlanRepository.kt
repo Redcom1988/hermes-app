@@ -13,6 +13,7 @@ interface WorkhourPlanRepository {
         workLocation: WorkLocation
     ): Int
     fun getVisiblePlans(): Flow<List<WorkhourPlan>>
+    suspend fun getWorkPlanById(planId: Int): WorkhourPlan?
     suspend fun update(plan: WorkhourPlan)
     suspend fun softDeletePlan(planId: Int)
     suspend fun insertPlans(plans: List<WorkhourPlan>)

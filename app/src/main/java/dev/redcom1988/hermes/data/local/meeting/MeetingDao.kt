@@ -59,6 +59,9 @@ interface MeetingDao {
     @Query("SELECT * FROM meetings WHERE meetingId = :id")
     suspend fun getMeetingById(id: Int): MeetingEntity?
 
+    @Query("SELECT * FROM meetings WHERE meetingId = :id")
+    fun getMeetingByIdFlow(id: Int): Flow<MeetingEntity?>
+
     @Transaction
     suspend fun upsertMeeting(meeting: MeetingEntity) {
         val existingMeeting = getMeetingById(meeting.meetingId)

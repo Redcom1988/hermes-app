@@ -54,6 +54,10 @@ class WorkhourPlanRepositoryImpl(
             .map { list -> list.map { it.toDomain() } }
     }
 
+    override suspend fun getWorkPlanById(planId: Int): WorkhourPlan? {
+        return workhourPlanDao.getWorkhourPlanById(planId)?.toDomain()
+    }
+
     override suspend fun update(plan: WorkhourPlan) {
         val updated = plan.copy(updatedAt = formattedNow())
         workhourPlanDao.upsertPlan(updated.toEntity(isSynced = false))

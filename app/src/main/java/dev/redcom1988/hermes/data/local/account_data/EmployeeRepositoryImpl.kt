@@ -16,6 +16,10 @@ class EmployeeRepositoryImpl(
     override fun getVisibleEmployees(): Flow<List<Employee>> {
         return employeeDao.getVisibleEmployees().map { it -> it.map { it.toDomain() } }
     }
+    
+    override fun getEmployeesByDivisionId(divisionId: Int): Flow<List<Employee>> {
+        return employeeDao.getEmployeesByDivisionId(divisionId).map { it -> it.map { it.toDomain() } }
+    }
 
     override suspend fun getEmployeeById(id: Int): Employee? {
         return employeeDao.getEmployeeById(id)?.toDomain()

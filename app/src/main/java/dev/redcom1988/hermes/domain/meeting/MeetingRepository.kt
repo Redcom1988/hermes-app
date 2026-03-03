@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
     fun getMeetingsFlow(): Flow<List<Meeting>>
+    fun getMeetingById(meetingId: Int): Flow<Meeting?>
     fun getUserLinkFlow(): Flow<List<MeetingUserCrossRef>>
     fun getClientLinkFlow(): Flow<List<MeetingClientCrossRef>>
     suspend fun addMeeting(

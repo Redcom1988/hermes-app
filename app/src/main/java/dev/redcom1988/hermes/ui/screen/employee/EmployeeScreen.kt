@@ -1,5 +1,6 @@
 package dev.redcom1988.hermes.ui.screen.employee
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,7 +16,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.domain.account_data.model.Employee
+import dev.redcom1988.hermes.domain.account_data.model.Division
 import dev.redcom1988.hermes.ui.main.ScreenLayout
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +33,7 @@ object EmployeeScreen : Screen {
     override fun Content() {
         val screenModel = remember { EmployeeScreenModel() }
         val state by screenModel.state.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
 
         ScreenLayout(
             screen = this,
@@ -42,7 +47,19 @@ object EmployeeScreen : Screen {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(state.employees) { employee ->
-                    EmployeeCard(employee)
+                    val division = state.divisions.find { it.id == employee.divisionId }
+                    EmployeeCard(
+                        employee = employee,
+                        division = division,
+                        onClick = {
+                            navigator.push(
+                                EmployeeDetailScreen(
+                                    employeeId = employee.id,
+                                    onBack = { navigator.pop() }
+                                )
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -50,11 +67,12 @@ object EmployeeScreen : Screen {
 }
 
 @Composable
-private fun EmployeeCard(employee: Employee) {
+private fun EmployeeCard(employee: Employee, division: Division?, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -110,6 +128,24 @@ private fun EmployeeCard(employee: Employee) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        // Division badge
+                        if (division != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = division.name,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
                     }
                 }
 

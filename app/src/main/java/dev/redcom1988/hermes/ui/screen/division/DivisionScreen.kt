@@ -1,5 +1,6 @@
 package dev.redcom1988.hermes.ui.screen.division
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.domain.account_data.model.Division
 import dev.redcom1988.hermes.ui.main.ScreenLayout
 
@@ -27,6 +30,7 @@ object DivisionScreen : Screen {
     override fun Content() {
         val screenModel = rememberScreenModel { DivisionScreenModel() }
         val state by screenModel.state.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
 
         ScreenLayout(
             screen = this,
@@ -42,7 +46,15 @@ object DivisionScreen : Screen {
                 items(state.divisions) { division ->
                     DivisionCard(
                         division = division,
-                        employeeCount = screenModel.getEmployeeCountForDivision(division.id)
+                        employeeCount = screenModel.getEmployeeCountForDivision(division.id),
+                        onClick = {
+                            navigator.push(
+                                DivisionDetailScreen(
+                                    divisionId = division.id,
+                                    onBack = { navigator.pop() }
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -51,11 +63,12 @@ object DivisionScreen : Screen {
 }
 
 @Composable
-private fun DivisionCard(division: Division, employeeCount: Int) {
+private fun DivisionCard(division: Division, employeeCount: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

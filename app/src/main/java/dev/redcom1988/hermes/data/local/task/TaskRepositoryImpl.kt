@@ -103,6 +103,11 @@ class TaskRepositoryImpl(
             .map { list -> list.map { it.toDomain() } }
     }
 
+    override fun getTaskById(taskId: Int): Flow<Task?> {
+        return taskDao.getTaskByIdFlow(taskId)
+            .map { it?.toDomain() }
+    }
+
     override fun getSubtaskForTask(taskId: Int): Flow<List<Task>> {
         return taskDao.getSubTasksByParentId(taskId).map { list -> list.map { it.toDomain() } }
     }

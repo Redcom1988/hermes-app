@@ -47,6 +47,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE taskId = :taskId")
     suspend fun getTaskById(taskId: Int): TaskEntity?
 
+    @Query("SELECT * FROM tasks WHERE taskId = :taskId")
+    fun getTaskByIdFlow(taskId: Int): Flow<TaskEntity?>
+
     @Query("UPDATE tasks SET status = :status AND isSynced = 0 AND updatedAt = :updatedAt WHERE taskId = :taskId")
     suspend fun markTaskAsCompleted(taskId: Int, status: TaskStatus, updatedAt: String)
 

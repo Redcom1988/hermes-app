@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface EmployeeRepository {
 
     fun getVisibleEmployees(): Flow<List<Employee>>
+    
+    fun getEmployeesByDivisionId(divisionId: Int): Flow<List<Employee>>
 
     suspend fun getEmployeeById(id: Int): Employee?
 

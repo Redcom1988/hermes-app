@@ -1,6 +1,7 @@
 package dev.redcom1988.hermes.ui.main
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import dev.redcom1988.hermes.ui.components.AppBar
 fun FormLayout(
     title: String,
     onBack: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current.applicationContext
@@ -34,6 +36,7 @@ fun FormLayout(
                 title = title,
                 navigateUp = onBack,
                 navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                actions = actions
             )
         }
     ) { padding ->

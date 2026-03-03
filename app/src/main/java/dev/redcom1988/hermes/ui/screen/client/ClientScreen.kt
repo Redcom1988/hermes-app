@@ -46,7 +46,7 @@ object ClientScreen : Screen {
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     FloatingActionButton(
-                        onClick = screenModel::showCreateDialog,
+                        onClick = { navigator.push(CreateClientScreen) },
                         modifier = Modifier.padding(16.dp),
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
@@ -83,8 +83,6 @@ object ClientScreen : Screen {
                         items(state.filteredClients, key = { it.client.id }) { clientWithData ->
                             ClientCard(
                                 clientWithData = clientWithData,
-                                onEdit = { screenModel.showEditDialog(clientWithData.client) },
-                                onDelete = { screenModel.deleteClient(clientWithData.client.id) },
                                 onClick = {
                                     navigator.push(
                                         ClientDetailScreen(
@@ -144,21 +142,6 @@ object ClientScreen : Screen {
                 }
             }
         }
-
-        // Create/Edit Client Dialog
-        if (state.showCreateDialog || state.showEditDialog) {
-            CreateEditClientDialog(
-                initialClient = state.editingClient,
-                onSave = { client ->
-                    if (state.showEditDialog) {
-                        screenModel.updateClient(client)
-                    } else {
-                        screenModel.addClient(client)
-                    }
-                },
-                onDismiss = screenModel::hideDialogs
-            )
-        }
     }
 }
 
@@ -200,12 +183,8 @@ private fun SearchSection(
 @Composable
 private fun ClientCard(
     clientWithData: ClientWithData,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
     onClick: () -> Unit = {}
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -217,52 +196,20 @@ private fun ClientCard(
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-            // Header with client info and actions
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = clientWithData.client.fullName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+            // Header with client info
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = clientWithData.client.fullName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                    Text(
-                        text = "Client ID: ${clientWithData.client.id}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                // Action buttons
-                Row {
-                    IconButton(
-                        onClick = onEdit,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit client"
-                        )
-                    }
-                    IconButton(
-                        onClick = { showDeleteDialog = true },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete client"
-                        )
-                    }
-                }
+                Text(
+                    text = "Client ID: ${clientWithData.client.id}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -333,33 +280,6 @@ private fun ClientCard(
             }
         }
     }
-
-    // Delete confirmation dialog
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Client") },
-            text = { Text("Are you sure you want to delete ${clientWithData.client.fullName}? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
 
 @Composable
@@ -429,7 +349,7 @@ private fun EmptyStateCard(isFiltered: Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {

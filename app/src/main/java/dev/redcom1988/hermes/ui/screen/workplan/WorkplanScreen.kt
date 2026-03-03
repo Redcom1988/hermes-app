@@ -79,6 +79,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.domain.account_data.model.Employee
 import dev.redcom1988.hermes.domain.common.WorkLocation
 import dev.redcom1988.hermes.domain.workhour_plan.WorkhourPlan
@@ -97,6 +99,7 @@ object WorkplanScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { WorkplanScreenModel() }
         val state by screenModel.state.collectAsState()
         val listState = rememberLazyListState()
@@ -109,7 +112,7 @@ object WorkplanScreen : Screen {
             floatingActionButton = {
                 if (screenModel.canCreatePlans()) {
                     FloatingActionButton(
-                        onClick = screenModel::showCreateDialog,
+                        onClick = { navigator.push(CreateWorkPlanScreen) },
                         modifier = Modifier.padding(16.dp),
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
@@ -117,9 +120,10 @@ object WorkplanScreen : Screen {
                             imageVector = Icons.Default.Add,
                             contentDescription = "Create Work Plan"
                         )
-                    }
-                }
-            }
+        }
+    }
+}
+
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // Plans List with Search Section as first item
@@ -162,8 +166,14 @@ object WorkplanScreen : Screen {
                             WorkPlanCard(
                                 plan = plan,
                                 employee = screenModel.getEmployeeForPlan(plan),
-                                canDelete = screenModel.canDeletePlan(plan),
-                                onDelete = { screenModel.deletePlan(plan.id) }
+                                onClick = {
+                                    navigator.push(
+                                        WorkPlanDetailScreen(
+                                            planId = plan.id,
+                                            onBack = { navigator.pop() }
+                                        )
+                                    )
+                                }
                             )
                         }
                     }
@@ -215,16 +225,6 @@ object WorkplanScreen : Screen {
                 }
             }
         }
-
-        // Create Work Plan Dialog
-        if (state.showCreateDialog) {
-            CreateWorkPlanDialog(
-                onCreatePlan = { date, startTime, endTime, location ->
-                    screenModel.createPlan(date, startTime, endTime, location)
-                },
-                onDismiss = screenModel::hideCreateDialog
-            )
-        }
     }
 }
 
@@ -252,7 +252,7 @@ private fun SearchAndFiltersSection(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
@@ -494,61 +494,39 @@ private fun SimpleCalendarView(
 private fun WorkPlanCard(
     plan: WorkhourPlan,
     employee: Employee?,
-    canDelete: Boolean,
-    onDelete: () -> Unit
+    onClick: () -> Unit = {}
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp))
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = employee?.fullName ?: "Employee #${plan.employeeId}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+            // Header with employee info
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = employee?.fullName ?: "Employee #${plan.employeeId}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                    Text(
-                        text = employee?.let {
-                            when (it.divisionId) {
-                                1 -> "Developer"
-                                2 -> "Project Manager"
-                                else -> "Unknown Division"
-                            }
-                        } ?: "Unknown Division",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                // Only show delete button if user has permission
-                if (canDelete) {
-                    IconButton(
-                        onClick = { showDeleteDialog = true },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete plan"
-                        )
-                    }
-                }
+                Text(
+                    text = employee?.let {
+                        when (it.divisionId) {
+                            1 -> "Developer"
+                            2 -> "Project Manager"
+                            else -> "Unknown Division"
+                        }
+                    } ?: "Unknown Division",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -643,33 +621,6 @@ private fun WorkPlanCard(
             }
         }
     }
-
-    // Delete confirmation dialog
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Work Plan") },
-            text = { Text("Are you sure you want to delete this work plan? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
 
 @Composable
@@ -677,7 +628,7 @@ private fun EmptyStateCard(isFiltered: Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(12.dp)),
+            .shadow(2.dp, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -709,263 +660,4 @@ private fun EmptyStateCard(isFiltered: Boolean) {
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateWorkPlanDialog(
-    onCreatePlan: (String, String, String, WorkLocation) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var startTime by remember { mutableStateOf("09:00") }
-    var endTime by remember { mutableStateOf("17:00") }
-    var selectedLocation by remember { mutableStateOf(WorkLocation.OFFICE) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "Create Work Plan",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                // Date Selection
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selectedDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")),
-                        onValueChange = { },
-                        label = { Text("Plan Date") },
-                        readOnly = true,
-                        leadingIcon = {
-                            Icon(Icons.Default.DateRange, contentDescription = null)
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { showDatePicker = true }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Select date")
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    // Transparent clickable overlay
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { showDatePicker = true }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Time Selection Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Start Time
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedTextField(
-                            value = startTime,
-                            onValueChange = { },
-                            label = { Text("Start Time") },
-                            readOnly = true,
-                            leadingIcon = {
-                                Icon(Icons.Default.AccessTime, contentDescription = null)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        // Transparent clickable overlay
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) { showStartTimePicker = true }
-                        )
-                    }
-
-                    // End Time
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedTextField(
-                            value = endTime,
-                            onValueChange = { },
-                            label = { Text("End Time") },
-                            readOnly = true,
-                            leadingIcon = {
-                                Icon(Icons.Default.AccessTime, contentDescription = null)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        // Transparent clickable overlay
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) { showEndTimePicker = true }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Work Location Selection
-                Text(
-                    text = "Work Location",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    WorkLocation.entries.forEach { location ->
-                        StatusChip(
-                            text = location.label,
-                            isSelected = selectedLocation == location,
-                            onClick = { selectedLocation = location },
-                            leadingIcon = if (location == WorkLocation.OFFICE) Icons.Default.Business else Icons.Default.Home,
-                            modifier = Modifier.weight(1f).height(48.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            val dateString = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                            onCreatePlan(dateString, startTime, endTime, selectedLocation)
-                        }
-                    ) {
-                        Text("Create Plan")
-                    }
-                }
-            }
-        }
-    }
-
-    // Date Picker Dialog
-    if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate.toEpochDay() * 24 * 60 * 60 * 1000
-        )
-
-        AlertDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            selectedDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
-                        }
-                        showDatePicker = false
-                    }
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
-            },
-            text = {
-                DatePicker(state = datePickerState)
-            }
-        )
-    }
-
-    // Start Time Picker Dialog
-    if (showStartTimePicker) {
-        TimePickerDialog(
-            onTimeSelected = { hour, minute ->
-                startTime = String.format("%02d:%02d", hour, minute)
-                showStartTimePicker = false
-            },
-            onDismiss = { showStartTimePicker = false },
-            initialTime = startTime
-        )
-    }
-
-    // End Time Picker Dialog
-    if (showEndTimePicker) {
-        TimePickerDialog(
-            onTimeSelected = { hour, minute ->
-                endTime = String.format("%02d:%02d", hour, minute)
-                showEndTimePicker = false
-            },
-            onDismiss = { showEndTimePicker = false },
-            initialTime = endTime
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TimePickerDialog(
-    onTimeSelected: (Int, Int) -> Unit,
-    onDismiss: () -> Unit,
-    initialTime: String
-) {
-    val timeParts = initialTime.split(":")
-    val initialHour = timeParts.getOrNull(0)?.toIntOrNull() ?: 9
-    val initialMinute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
-
-    val timePickerState = rememberTimePickerState(
-        initialHour = initialHour,
-        initialMinute = initialMinute
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onTimeSelected(timePickerState.hour, timePickerState.minute)
-                }
-            ) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        },
-        text = {
-            TimePicker(state = timePickerState)
-        }
-    )
 }

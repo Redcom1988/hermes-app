@@ -1,6 +1,7 @@
 package dev.redcom1988.hermes.ui.main
 
 import android.app.Application
+import android.app.NotificationManager
 import android.util.Log
 import dev.redcom1988.hermes.core.di.coreModule
 import dev.redcom1988.hermes.core.notification.NotificationHelper
@@ -44,6 +45,13 @@ class MainApplication : Application() {
         val notificationHelper by injectLazy<NotificationHelper>()
         notificationHelper.createNotificationChannels(
             listOf(
+                NotificationHelper.Channel(
+                    id = "attendance_tracking",
+                    name = "Attendance Tracking",
+                    description = "Shows ongoing attendance status with elapsed time",
+                    importance = NotificationManager.IMPORTANCE_DEFAULT,
+                    showBadge = false
+                )
             )
         )
     }

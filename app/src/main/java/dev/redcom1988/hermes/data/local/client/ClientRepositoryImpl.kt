@@ -125,6 +125,11 @@ class ClientRepositoryImpl(
             .map { list -> list.map { it.toDomain() } }
     }
 
+    override fun getClientById(clientId: Int): Flow<Client?> {
+        return clientDao.getClientByIdFlow(clientId)
+            .map { it?.toDomain() }
+    }
+
     data class ClientWithData(
         val client: Client,
         val data: List<ClientData>,
