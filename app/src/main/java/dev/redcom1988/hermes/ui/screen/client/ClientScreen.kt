@@ -199,7 +199,7 @@ private fun ClientCard(
             // Header with client info
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = clientWithData.client.fullName,
+                    text = clientWithData.client.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -390,7 +390,7 @@ private fun CreateEditClientDialog(
     onSave: (Client) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var fullName by remember { mutableStateOf(initialClient?.fullName ?: "") }
+    var fullName by remember { mutableStateOf(initialClient?.name ?: "") }
     var phoneNumber by remember { mutableStateOf(initialClient?.phoneNumber ?: "") }
     var email by remember { mutableStateOf(initialClient?.email ?: "") }
     var address by remember { mutableStateOf(initialClient?.address ?: "") }
@@ -486,7 +486,7 @@ private fun CreateEditClientDialog(
                         onClick = {
                             val client = Client(
                                 id = initialClient?.id ?: 0, // Will be handled by repository
-                                fullName = fullName,
+                                name = fullName,
                                 phoneNumber = phoneNumber,
                                 email = email,
                                 address = address,

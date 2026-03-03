@@ -2,11 +2,10 @@ package dev.redcom1988.hermes.data.local.client
 
 import dev.redcom1988.hermes.data.local.client.entity.ClientEntity
 import dev.redcom1988.hermes.domain.client.Client
-import dev.redcom1988.hermes.domain.common.SyncStatus
 
 fun ClientEntity.toDomain() = Client(
     id = clientId,
-    fullName = fullName,
+    name = fullName,
     phoneNumber = phoneNumber,
     email = email,
     address = address,
@@ -17,7 +16,7 @@ fun ClientEntity.toDomain() = Client(
 
 fun Client.toEntity(isSynced: Boolean = true) = ClientEntity(
     clientId = id,
-    fullName = fullName,
+    fullName = name,
     phoneNumber = phoneNumber,
     email = email,
     address = address,

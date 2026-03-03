@@ -68,8 +68,12 @@ suspend fun Call.awaitSuccess(): Response {
 inline fun <reified T> Response.parseAs(
     deserializer: DeserializationStrategy<T> = serializer()
 ): T {
+    val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     return this.body.source().use {
-        Json.decodeFromBufferedSource(deserializer, it)
+        json.decodeFromBufferedSource(deserializer, it)
     }
 }
 

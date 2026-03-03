@@ -28,7 +28,7 @@ class EditClientScreenModel(private val clientId: Int) : ScreenModel, KoinCompon
                     _state.update {
                         it.copy(
                             client = client,
-                            fullName = client.fullName,
+                            fullName = client.name,
                             phoneNumber = client.phoneNumber,
                             email = client.email,
                             address = client.address,
@@ -76,7 +76,7 @@ class EditClientScreenModel(private val clientId: Int) : ScreenModel, KoinCompon
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             try {
                 val updatedClient = client.copy(
-                    fullName = currentState.fullName.trim(),
+                    name = currentState.fullName.trim(),
                     phoneNumber = currentState.phoneNumber.trim(),
                     email = currentState.email.trim(),
                     address = currentState.address.trim()

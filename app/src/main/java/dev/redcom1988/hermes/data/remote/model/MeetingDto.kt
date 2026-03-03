@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MeetingDto(
     val id: Int,
+    @SerialName("meeting_title")
     val title: String,
+    @SerialName("meeting_note")
     val note: String?,
     @SerialName("start_time")
     val startTime: String,

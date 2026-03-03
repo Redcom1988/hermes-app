@@ -9,6 +9,7 @@ const val userEntityTableName = "users"
 @Entity(tableName = userEntityTableName)
 data class UserEntity(
     @PrimaryKey val userId: Int,
+    val name: String,
     val email: String,
     val role: UserRole,
     val isDeleted: Boolean = false,

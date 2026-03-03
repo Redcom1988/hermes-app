@@ -6,6 +6,7 @@ import dev.redcom1988.hermes.domain.account_data.enums.UserRole
 
 fun UserEntity.toDomain() = User(
     id = userId,
+    name = name,
     email = email,
     role = role.label,
     isDeleted = isDeleted,
@@ -15,6 +16,7 @@ fun UserEntity.toDomain() = User(
 
 fun User.toEntity() = UserEntity(
     userId = id,
+    name = name,
     email = email,
     role = UserRole.fromLabel(role) ?: UserRole.USER,
     isDeleted = isDeleted,

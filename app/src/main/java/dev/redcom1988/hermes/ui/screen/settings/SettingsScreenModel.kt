@@ -57,7 +57,7 @@ class SettingsScreenModel : ScreenModel {
 
             try {
                 syncRepository.performSync(
-                    lastSyncTime = userPreference.lastSyncTime().get(),
+                    lastSyncTime = "", // Empty string to fetch ALL data, not just changes
                     forceClearDataOverride = true
                 )
                 _state.value = _state.value.copy(isLoading = false)

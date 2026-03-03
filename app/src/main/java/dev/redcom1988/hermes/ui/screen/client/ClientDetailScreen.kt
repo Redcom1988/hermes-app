@@ -20,7 +20,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.redcom1988.hermes.data.local.client.ClientRepositoryImpl.ClientWithData
-import dev.redcom1988.hermes.domain.client.Client
 import dev.redcom1988.hermes.domain.client.ClientData
 import dev.redcom1988.hermes.domain.service.Service
 import dev.redcom1988.hermes.ui.main.FormLayout
@@ -38,7 +37,7 @@ data class ClientDetailScreen(
         val state by screenModel.state.collectAsState()
 
         FormLayout(
-            title = state.client?.client?.fullName ?: "Client Details",
+            title = state.client?.client?.name ?: "Client Details",
             onBack = onBack
         ) {
             if (state.isLoading) {
@@ -161,7 +160,7 @@ private fun ClientInfoCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = clientWithData.client.fullName,
+                        text = clientWithData.client.name,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -667,7 +666,7 @@ private fun ServiceCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = if (service.startTime.isNotBlank() && service.expireTime.isNotBlank()) {
+                            text = if (service.startTime?.isNotBlank() == true && service.expireTime?.isNotBlank() == true) {
                                 "${service.startTime} - ${service.expireTime}"
                             } else {
                                 "Not specified"

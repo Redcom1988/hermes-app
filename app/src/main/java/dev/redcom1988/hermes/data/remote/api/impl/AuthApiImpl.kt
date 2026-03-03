@@ -18,7 +18,7 @@ class AuthApiImpl(
     override suspend fun login(request: LoginRequestDto): Response {
         val jsonBody = Json.Default.encodeToString(LoginRequestDto.serializer(), request)
             .toRequestBody("application/json".toMediaType())
-        val request = POST("$baseUrl/login", body = jsonBody)
+        val request = POST("$baseUrl/mobile/login", body = jsonBody)
         return networkHelper.client.newCall(request).await()
     }
 

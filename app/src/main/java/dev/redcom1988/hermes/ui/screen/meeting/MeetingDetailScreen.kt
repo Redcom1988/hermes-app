@@ -119,7 +119,7 @@ data class MeetingDetailScreen(
                     screenModel.hideAddClientDialog()
                 },
                 onDismiss = screenModel::hideAddClientDialog,
-                itemName = { it.fullName },
+                itemName = { it.name },
                 itemSubtitle = { "Client ID: ${it.id}" }
             )
         }
@@ -293,7 +293,7 @@ private fun ClientAttendeesSection(
             } else {
                 clients.forEach { client ->
                     AttendeeCard(
-                        name = client.fullName,
+                        name = client.name,
                         subtitle = "Client ID: ${client.id}",
                         email = client.email,
                         phone = client.phoneNumber,

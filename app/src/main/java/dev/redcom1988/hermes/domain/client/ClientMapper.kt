@@ -6,7 +6,7 @@ import dev.redcom1988.hermes.data.remote.model.ClientDto
 fun Client.toDto(): ClientDto {
     return ClientDto(
         id = this.id,
-        fullName = this.fullName,
+        name = this.name,
         phoneNumber = this.phoneNumber,
         email = this.email,
         address = this.address,

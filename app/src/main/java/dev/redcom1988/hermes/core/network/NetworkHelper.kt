@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 class NetworkHelper(
     private val context: Context,
     val isDebugBuild: Boolean,
+    private val authInterceptor: dev.redcom1988.hermes.core.network.interceptor.AuthInterceptor,
 ) {
 
     private val connectivityManager = context
@@ -34,6 +35,7 @@ class NetworkHelper(
                 ),
             )
             .addInterceptor(UncaughtExceptionInterceptor())
+            .addInterceptor(authInterceptor)
             .addNetworkInterceptor(IgnoreGzipInterceptor())
             .addNetworkInterceptor(BrotliInterceptor)
 

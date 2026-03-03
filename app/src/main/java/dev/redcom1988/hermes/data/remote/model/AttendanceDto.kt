@@ -16,8 +16,8 @@ data class AttendanceDto(
     val endTime: String?,
     @SerialName("work_location")
     val workLocation: WorkLocation,
-    val longitude: Double,
-    val latitude: Double,
+    val longitude: Double?,
+    val latitude: Double?,
     @SerialName("image_path")
     val imagePath: String?,
     @SerialName("task_link")

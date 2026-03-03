@@ -6,8 +6,8 @@ class Service(
     val serviceTypeId: Int,
     val status: String,
     val servicePrice: Int,
-    val startTime: String,
-    val expireTime: String,
+    val startTime: String?,
+    val expireTime: String?,
     val isDeleted: Boolean = false,
     val updatedAt: String,
     val createdAt: String

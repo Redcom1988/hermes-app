@@ -4,11 +4,9 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.redcom1988.hermes.core.util.extension.injectLazy
 import dev.redcom1988.hermes.data.local.client.ClientRepositoryImpl.ClientWithData
-import dev.redcom1988.hermes.domain.client.Client
 import dev.redcom1988.hermes.domain.client.ClientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -51,7 +49,7 @@ class ClientScreenModel : ScreenModel {
         // Filter by search query (client name)
         if (currentState.searchQuery.isNotBlank()) {
             filteredClients = filteredClients.filter { clientWithData ->
-                clientWithData.client.fullName.contains(currentState.searchQuery, ignoreCase = true)
+                clientWithData.client.name.contains(currentState.searchQuery, ignoreCase = true)
             }
         }
 

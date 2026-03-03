@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDto(
     val id: Int,
+    val name: String,
     val email: String,
     val role: String,
     @SerialName("is_deleted")
@@ -19,6 +20,7 @@ data class UserDto(
 
 fun UserDto.toDomain() = User(
     id = id,
+    name = name,
     email = email,
     role = role,
     isDeleted = isDeleted,

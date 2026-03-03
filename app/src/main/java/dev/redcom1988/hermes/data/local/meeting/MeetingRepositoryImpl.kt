@@ -60,6 +60,7 @@ class MeetingRepositoryImpl(
         endTime: String
     ): Int {
         val tempId = generateTempMeetingId()
+        
         val entity = MeetingEntity(
             meetingId = tempId,
             title = title,

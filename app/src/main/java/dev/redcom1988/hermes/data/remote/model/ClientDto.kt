@@ -7,8 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ClientDto(
     val id: Int,
-    @SerialName("full_name")
-    val fullName: String,
+    val name: String,
     @SerialName("phone_number")
     val phoneNumber: String,
     val email: String,
@@ -24,7 +23,7 @@ data class ClientDto(
 fun ClientDto.toDomain(): Client {
     return Client(
         id = this.id,
-        fullName = this.fullName,
+        name = this.name,
         phoneNumber = this.phoneNumber,
         email = this.email,
         address = this.address,

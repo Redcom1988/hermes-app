@@ -58,7 +58,7 @@ import dev.redcom1988.hermes.data.local.workhour_plan.entity.WorkhourPlanEntity
         UserEntity::class,
         WorkhourPlanEntity::class
     ],
-    version = 2,
+    version = 8,
     exportSchema = false
 )
 abstract class HermesDatabase : RoomDatabase() {

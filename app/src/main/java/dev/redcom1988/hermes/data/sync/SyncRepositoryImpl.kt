@@ -58,8 +58,12 @@ class SyncRepositoryImpl(
             throw Exception("Failed to fetch latest data from remote: ${response.code}")
         }
 
+        val json = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
         val bodyString = response.body.string()
-        return Json.decodeFromString<BulkSyncApiResponseDto>(bodyString)
+        return json.decodeFromString<BulkSyncApiResponseDto>(bodyString)
     }
 
     private suspend fun upsertIndependentEntities(data: BulkSyncApiResponseDto) {
@@ -175,7 +179,8 @@ class SyncRepositoryImpl(
         val pendingChanges = collectPendingChanges()
         Log.d("API", "Pending local changes: $pendingChanges")
 
-        if (pendingChanges.hasAny() && !forceClearDataOverride) {
+        // Push local changes if there are any
+        if (pendingChanges.hasAny()) {
             try {
                 pushLocalChanges(pendingChanges)
                 Log.d("API", "Successfully pushed local changes to remote")
@@ -185,8 +190,10 @@ class SyncRepositoryImpl(
             }
         }
 
+        // Always do full sync: clear database and fetch everything
         clearLocalData()
-        val incomingData = fetchDataFromRemote(lastSyncTime) // will throw if 404
+        
+        val incomingData = fetchDataFromRemote("") // Empty string = fetch all data
         Log.d("API", "Fetched incoming data: $incomingData")
 
         upsertIncomingData(incomingData)

@@ -8,7 +8,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TaskDto(
     val id: Int,
+    @SerialName("task_name")
     val name: String,
+    @SerialName("task_description")
     val description: String? = null,
     val deadline: String,
     val status: String,

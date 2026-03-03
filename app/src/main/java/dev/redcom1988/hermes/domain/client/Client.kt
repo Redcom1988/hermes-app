@@ -4,7 +4,7 @@ import dev.redcom1988.hermes.core.util.extension.formattedNow
 
 data class Client(
     val id: Int,
-    val fullName: String,
+    val name: String,
     val phoneNumber: String,
     val email: String,
     val address: String,

@@ -50,11 +50,7 @@ class AuthRepositoryImpl(
                     val expiresAt = parseExpiryDate(userData.expiresAt)
 
                     try {
-                        syncRepository.performSync(
-                            lastSyncTime = "",
-                            forceClearDataOverride = true
-                        )
-
+                        // Save token FIRST so sync can use it
                         authPreference.saveLoginData(
                             userId = userData.user.id,
                             userEmail = userData.user.email,
@@ -71,6 +67,13 @@ class AuthRepositoryImpl(
                         )
 
                         Log.d("ASD", "Saved division type: ${userData.division?.name ?: ""}")
+                        Log.d("ASD", "Token saved, now performing sync")
+
+                        // Now perform sync with the saved token
+                        syncRepository.performSync(
+                            lastSyncTime = "",
+                            forceClearDataOverride = true
+                        )
 
                         Log.d("ASD", "Login + sync successful")
                         Result.success(true)

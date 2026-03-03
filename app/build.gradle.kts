@@ -23,7 +23,7 @@ android {
         buildConfigField("String", "MINIO_ENDPOINT", "\"https://subsly-api.achmad.dev/\"")
         buildConfigField("String", "MINIO_ACCESS_KEY", "\"nI2Fl8JQ6KiR6lQfaoRF\"")
         buildConfigField("String", "MINIO_SECRET_KEY", "\"tvWHPFpox2212aItXkLIwq4Oi37N017XYhXdrFXa\"")
-        buildConfigField("String", "API_BASE_URL", "\"https://mock-api.achmad.dev/hermes\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://100.108.202.107:8000/api\"")
     }
 
     buildTypes {

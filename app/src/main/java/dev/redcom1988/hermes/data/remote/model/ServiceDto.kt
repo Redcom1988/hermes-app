@@ -14,9 +14,9 @@ data class ServiceDto(
     val status: String,
     val price: Int,
     @SerialName("start_time")
-    val startTime: String,
+    val startTime: String?,
     @SerialName("expired_time")
-    val expireTime: String,
+    val expireTime: String?,
     @SerialName("is_deleted")
     val isDeleted: Boolean,
     @SerialName("updated_at")

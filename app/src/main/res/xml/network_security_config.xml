@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext (HTTP) traffic for development -->
+    <!-- WARNING: In production, you should use HTTPS only -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Allow HTTP traffic to Tailscale IP range (100.64.0.0/10) -->
+        <domain includeSubdomains="true">100.108.202.107</domain>
+    </domain-config>
+</network-security-config>

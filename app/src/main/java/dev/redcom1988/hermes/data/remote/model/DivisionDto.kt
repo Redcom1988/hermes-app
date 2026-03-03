@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DivisionDto(
     val id: Int,
+    @SerialName("division_name")
     val name: String,
     @SerialName("required_workhours")
     val requiredWorkHours: Int,

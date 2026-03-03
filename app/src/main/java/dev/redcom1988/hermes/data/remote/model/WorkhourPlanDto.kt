@@ -13,9 +13,9 @@ data class WorkhourPlanDto(
     val employeeId: Int,
     @SerialName("plan_date")
     val planDate: String,
-    @SerialName("planned_start_time")
+    @SerialName("planned_starttime")
     val plannedStartTime: String,
-    @SerialName("planned_end_time")
+    @SerialName("planned_endtime")
     val plannedEndTime: String,
     @SerialName("work_location")
     val workLocation: String,
