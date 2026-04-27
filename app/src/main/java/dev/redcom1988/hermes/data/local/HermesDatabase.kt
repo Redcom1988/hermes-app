@@ -2,6 +2,7 @@ package dev.redcom1988.hermes.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import dev.redcom1988.hermes.data.local.account_data.dao.AccessDao
 import dev.redcom1988.hermes.data.local.account_data.entity.AccessEntity
 import dev.redcom1988.hermes.data.local.attendance.AttendanceDao
@@ -36,6 +37,7 @@ import dev.redcom1988.hermes.data.local.task.EmployeeTaskDao
 import dev.redcom1988.hermes.data.local.workhour_plan.WorkhourPlanDao
 import dev.redcom1988.hermes.data.local.workhour_plan.entity.WorkhourPlanEntity
 
+@TypeConverters(Converters::class)
 @Database(
     entities = [
         AccessEntity::class,

@@ -316,7 +316,6 @@
 - **DNS over HTTPS**: Secure DNS resolution
 
 ### **Storage & Files**
-- **MinIO**: Object storage integration for images/documents
 - **SharedPreferences**: User preferences (via PreferenceKTX)
 - **Room Database**: Structured data storage (SQLite)
 

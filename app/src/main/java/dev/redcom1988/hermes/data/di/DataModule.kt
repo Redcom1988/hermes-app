@@ -59,22 +59,10 @@ import dev.redcom1988.hermes.domain.meeting.MeetingRepository
 import dev.redcom1988.hermes.domain.service.ServiceRepository
 import dev.redcom1988.hermes.domain.task.TaskRepository
 import dev.redcom1988.hermes.domain.workhour_plan.WorkhourPlanRepository
-import io.minio.MinioClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val dataModule = module {
-    // minio
-    single {
-        MinioClient.builder()
-            .endpoint(BuildConfig.MINIO_ENDPOINT)
-            .credentials(
-                BuildConfig.MINIO_ACCESS_KEY,
-                BuildConfig.MINIO_SECRET_KEY
-            )
-            .build()
-    }
-
     // database
     single<HermesDatabase> {
         Room
