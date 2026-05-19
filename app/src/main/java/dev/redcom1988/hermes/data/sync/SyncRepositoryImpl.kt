@@ -190,10 +190,13 @@ class SyncRepositoryImpl(
             }
         }
 
-        // Always do full sync: clear database and fetch everything
-        clearLocalData()
-        
-        val incomingData = fetchDataFromRemote("") // Empty string = fetch all data
+        val syncSince = if (forceClearDataOverride) "" else lastSyncTime
+
+        if (forceClearDataOverride) {
+            clearLocalData()
+        }
+
+        val incomingData = fetchDataFromRemote(syncSince)
         Log.d("API", "Fetched incoming data: $incomingData")
 
         upsertIncomingData(incomingData)
